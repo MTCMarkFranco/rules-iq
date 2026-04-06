@@ -9,12 +9,12 @@
   - `content`: the text of the chunk being indexed.
   - `document_id` (string): unique identifier for the source document.
   - `source_uri` (string): URL or path to the source document.
-  - `page_number` (int, if available): page in the original document.
-  - `char_range` (object, if available): `{ "start": int, "end": int }`.
   - Optional: `existing_rules_column` (string, if re-indexing or updating).
   - Optional: `workflow_hint` (string, e.g., "EligibilityRules", "CoverageRules").
   - Optional: `source_document_version` (string, e.g., "2024.1", "B-21 Rev 2025").
   - Optional: `ruleset_version` (string, e.g., "v2.1.0") — assigned by the pipeline orchestrator.
+
+> **NOTE:** `page_number` and `char_range` are NOT available when using the SplitSkill's `textItems` output. The SplitSkill produces plain text chunks without page metadata. If page-level tracking is needed in the future, use the Document Intelligence OCR skill or a custom pre-processing step.
 - **Index schema (conceptual):**
   - `Content` (string) — the raw chunk text
   - `Vectorized_Content` (vector) — embedding of the chunk
@@ -50,8 +50,10 @@
 }
 ```
 
-- If `hasRules = false`, `WorkflowName` MUST be `null` and `Rules` MUST be an empty array `[]`.
+- If `hasRules = false`, `WorkflowName` MUST be set to empty string `""` and `Rules` MUST be an empty array `[]`.
 - If `hasRules = true`, `WorkflowName` MUST be set (use `workflow_hint` if provided, otherwise infer from content).
+
+> **IMPORTANT — Null Safety:** The Web API skill MUST return `string.Empty` (not `null`) for `WorkflowName` and `RulesJson` when `hasRules = false`. Null values in projected fields cause AI Search to emit index projection warnings for every non-rule chunk.
 - If `ruleset_version` is provided, include it as `RulesetVersion` in the output. If not provided, omit the field (the pipeline orchestrator will assign it).
 - If `source_document_version` is provided, include it as `SourceDocumentVersion` in the output and in each rule's `Metadata`.
 
@@ -81,7 +83,7 @@
     - Replace it if the chunk content has changed significantly (this decision is typically made by the orchestrating code, not you).
   - When a new version of a source document is ingested, the pipeline orchestrator will increment `ruleset_version` and `source_document_version`. The enrichment skill should include these in the output so the index is properly versioned.
 - **Empty or whitespace-only content:**
-  - Output: `hasRules = false`, `WorkflowName = null`, `Rules = []`.
+  - Output: `hasRules = false`, `WorkflowName = ""`, `Rules = []`.
 
 ## Acceptance Criteria
 - [ ] For chunks with clear, enforceable conditions, `hasRules = true` and at least one rule is emitted.

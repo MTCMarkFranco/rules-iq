@@ -60,11 +60,14 @@ This executes the following phases in order:
 | 1 | Creates resource group `rg-rules-iq`, managed identity, hub storage |
 | 2 | Configures existing AI Search (semantic ranker, disable local auth) and blob storage |
 | 3 | Deploys App Service (indexer skill host), AI Foundry Hub + Project |
+| 3.5 | Creates Entra ID app registration, configures Easy Auth v2 (v1 issuer, dual audiences) |
+| 3.6 | Builds and deploys the indexer-skill .NET 8 Web API to App Service |
 | 4 | Applies all RBAC role assignments (managed identity, zero API keys) |
+| 4.5 | Uploads policy documents to blob storage (handles `publicNetworkAccess: Disabled`) |
 | 5 | Creates AI Search data-plane objects (index, data source, skillset, indexer) |
 | 6 | Creates AI Foundry agents (extraction, normalization, evaluation planning) |
 
-You can skip phases with flags: `-SkipBicep`, `-SkipDataPlane`, `-SkipAgents`.
+You can skip phases with flags: `-SkipBicep`, `-SkipAppAuth`, `-SkipAppDeploy`, `-SkipUpload`, `-SkipDataPlane`, `-SkipAgents`.
 
 ### 4. Upload Policy Documents and Run the Indexer
 
@@ -136,7 +139,7 @@ npx playwright show-report
     /ui-adapter                # Blazor Server UI with compliance dashboard
 /infra
     /modules                   # Bicep modules (7 files)
-    /scripts                   # PowerShell deployment scripts (6 files)
+    /scripts                   # PowerShell deployment scripts (8 files)
     /definitions               # AI Search index/skillset/indexer + agent definitions
 /tests
     /e2e                       # Playwright end-to-end tests

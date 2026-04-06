@@ -108,6 +108,8 @@ Define the complete Azure infrastructure for the Rules-IQ platform, including al
 1. Disable shared key access: `az storage account update --name sadatafileshubcanada --resource-group RG-OpenAI --allow-shared-key-access false`
 2. Create blob container for policy documents: `az storage container create --name policy-documents --account-name sadatafileshubcanada --auth-mode login`
 
+> **IMPORTANT:** This storage account has `publicNetworkAccess: Disabled`. Uploading policy documents from a developer machine requires temporarily enabling public access. The `upload-policy-docs.ps1` script handles this automatically — it enables access, uploads, and re-disables access in a `finally` block.
+
 **Container Structure:**
 ```
 policy-documents/
@@ -162,6 +164,93 @@ All agents use the same AI Foundry project and the same connected OpenAI resourc
 | Managed Identity | **System-assigned** |
 
 This hosts the custom Web API skill called by the AI Search indexer to extract rules from document chunks.
+
+#### Entra ID App Registration (WebApiSkill Authentication)
+
+The AI Search indexer authenticates to the custom Web API skill via its **system-assigned managed identity**. This requires an Entra ID app registration on the App Service so AI Search can acquire a token for the skill endpoint.
+
+| Property | Value |
+|----------|-------|
+| App Registration Name | `app-rulesiq-indexer-skill` |
+| Application (Client) ID | `512c962b-55aa-4d13-a9fd-e4fa5888c1e5` |
+| Identifier URI | `api://512c962b-55aa-4d13-a9fd-e4fa5888c1e5` |
+| Tenant ID | `d7d6e19e-5176-4dea-a576-1681f77e0243` |
+
+> **IMPORTANT:** The identifier URI MUST use the `api://{appId}` format with the actual GUID — friendly names like `api://app-rulesiq-indexer-skill` are rejected by most tenant policies.
+
+**Creation Commands:**
+```powershell
+# Create the app registration
+$appId = az ad app create --display-name "app-rulesiq-indexer-skill" --query appId -o tsv
+
+# Set the identifier URI (must use the actual GUID)
+az ad app update --id $appId --identifier-uris "api://$appId"
+
+# Create a service principal for the app registration
+az ad sp create --id $appId
+```
+
+#### Easy Auth v2 (App Service Authentication)
+
+The App Service MUST have **Easy Auth v2** (Microsoft Identity Platform / Entra ID) enabled so the AI Search system-assigned managed identity can authenticate when calling the custom WebApiSkill.
+
+| Property | Value |
+|----------|-------|
+| Auth Provider | Microsoft Entra ID (v2) |
+| Client ID | `512c962b-55aa-4d13-a9fd-e4fa5888c1e5` |
+| Issuer URL | `https://sts.windows.net/d7d6e19e-5176-4dea-a576-1681f77e0243/` |
+| Allowed Audiences | `api://512c962b-55aa-4d13-a9fd-e4fa5888c1e5`, `512c962b-55aa-4d13-a9fd-e4fa5888c1e5` |
+| Unauthenticated Action | Return 401 |
+
+> **CRITICAL:** The issuer URL MUST use the **v1 endpoint** (`https://sts.windows.net/{tenantId}/`), NOT the v2.0 endpoint (`https://login.microsoftonline.com/{tenantId}/v2.0`). AI Search's system-assigned managed identity acquires tokens via the v1 endpoint, and a v2.0-only issuer will reject these tokens.
+
+> **CRITICAL:** Both `api://{appId}` AND the raw `{appId}` GUID MUST be listed as allowed audiences. AI Search may present either format in the token's `aud` claim.
+
+**Configuration Command:**
+```powershell
+$appId = "512c962b-55aa-4d13-a9fd-e4fa5888c1e5"
+$tenantId = "d7d6e19e-5176-4dea-a576-1681f77e0243"
+
+az webapp auth update `
+    --name app-rulesiq-indexer-skill `
+    --resource-group rg-rules-iq `
+    --enabled true `
+    --action LoginWithAzureActiveDirectory `
+    --aad-client-id $appId `
+    --aad-issuer "https://sts.windows.net/$tenantId/" `
+    --aad-allowed-token-audiences "api://$appId" "$appId"
+```
+
+After configuring Easy Auth, **restart the App Service** for the changes to take effect:
+```powershell
+az webapp restart --name app-rulesiq-indexer-skill --resource-group rg-rules-iq
+```
+
+#### App Code Deployment
+
+The custom Web API skill (.NET 8) must be built and deployed to the App Service:
+
+```powershell
+# Build and publish
+dotnet publish src/indexer-skill/RulesIQ.IndexerSkill/RulesIQ.IndexerSkill.csproj `
+    -c Release -o ./publish
+
+# Create zip archive
+Compress-Archive -Path ./publish/* -DestinationPath ./publish.zip -Force
+
+# Deploy to App Service
+az webapp deploy `
+    --name app-rulesiq-indexer-skill `
+    --resource-group rg-rules-iq `
+    --src-path ./publish.zip `
+    --type zip
+
+# Clean up
+Remove-Item -Path ./publish -Recurse -Force
+Remove-Item -Path ./publish.zip -Force
+```
+
+> **NOTE:** The controller returns `string.Empty` (not `null`) for `WorkflowName` and `RulesJson` when `hasRules = false`. This prevents index projection warnings on chunks without rules. Null values in projected fields cause AI Search to emit warnings for every non-rule chunk.
 
 ---
 
@@ -298,13 +387,14 @@ The index schema is defined in the [indexer-output-schema.md](../contracts/04-in
       "context": "/document/pages/*",
       "uri": "https://app-rulesiq-indexer-skill.azurewebsites.net/api/extract-rules",
       "httpMethod": "POST",
-      "authResourceId": "api://app-rulesiq-indexer-skill",
-      "authIdentity": { "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity" },
+      "authResourceId": "api://512c962b-55aa-4d13-a9fd-e4fa5888c1e5",
+      "batchSize": 1,
+      "degreeOfParallelism": 2,
+      "timeout": "PT60S",
       "inputs": [
         { "name": "content", "source": "/document/pages/*" },
         { "name": "document_id", "source": "/document/metadata_storage_path" },
-        { "name": "source_uri", "source": "/document/metadata_storage_path" },
-        { "name": "page_number", "source": "/document/pages/*" }
+        { "name": "source_uri", "source": "/document/metadata_storage_path" }
       ],
       "outputs": [
         { "name": "rulesJson", "targetName": "rulesJson" },
@@ -384,18 +474,32 @@ Infrastructure must be deployed in this order due to dependencies:
 11. Create AI Foundry Hub `rulesiq-ai-hub`
 12. Create AI Foundry Project `rulesiq-agent-project`
 
+### Phase 3.5: App Registration & Authentication
+13. Create Entra ID app registration for `app-rulesiq-indexer-skill`
+14. Set identifier URI to `api://{appId}` (using the actual GUID)
+15. Create service principal for the app registration
+16. Configure Easy Auth v2 on the App Service (v1 issuer, dual audiences)
+17. Restart the App Service to apply Easy Auth changes
+
+### Phase 3.6: App Code Deployment
+18. Build and publish `RulesIQ.IndexerSkill` (.NET 8)
+19. Deploy zip package to `app-rulesiq-indexer-skill`
+
 ### Phase 4: RBAC Assignments
-13. Assign all 13 role assignments from the table above
-14. Wait ~5 minutes for RBAC propagation
+20. Assign all role assignments from the RBAC table above
+21. Wait ~60 seconds for RBAC propagation
+
+### Phase 4.5: Upload Policy Documents
+22. Upload PDFs to `policy-documents` container (handles `publicNetworkAccess: Disabled`)
 
 ### Phase 5: Data-Plane Objects (CLI/SDK)
-15. Create AI Search index `idx-rules-iq`
-16. Create AI Search data source `ds-policy-documents`
-17. Create AI Search skillset `ss-rule-extraction`
-18. Create AI Search indexer `ixr-policy-rules`
+23. Create AI Search index `idx-rules-iq`
+24. Create AI Search data source `ds-policy-documents`
+25. Create AI Search skillset `ss-rule-extraction`
+26. Create AI Search indexer `ixr-policy-rules`
 
 ### Phase 6: AI Foundry Agents (v2 API)
-19. Create agent definitions via AI Foundry v2 REST API
+27. Create agent definitions via AI Foundry v2 REST API
 
 ---
 
@@ -414,11 +518,12 @@ infra/
   │     ├── app-service.bicep
   │     ├── ai-foundry-hub.bicep
   │     ├── ai-foundry-project.bicep
-  │     ├── search-config.bicep   # Reconfigure existing AI Search
   │     └── rbac-assignments.bicep
   ├── scripts/
   │     ├── deploy.ps1            # Master deployment script
   │     ├── configure-search.ps1  # Configure existing search service
+  │     ├── setup-app-auth.ps1    # Create app registration + Easy Auth v2
+  │     ├── deploy-app.ps1        # Build + deploy indexer skill to App Service
   │     ├── upload-policy-docs.ps1 # Upload PDFs (handles network access + container creation)
   │     ├── create-index.ps1      # Create AI Search index (data-plane)
   │     ├── create-indexer.ps1    # Create data source, skillset, indexer
@@ -442,10 +547,20 @@ infra/
 - [ ] `disableLocalAuth: true` on OpenAI, AI Search, and Storage.
 - [ ] AI Search is Standard SKU with Semantic Ranker enabled.
 - [ ] AI Search index uses `text-embedding-3-large` (3072 dimensions) for vector field.
+- [ ] AI Search index `id` field uses `keyword` analyzer (required by index projections).
+- [ ] AI Search skillset uses `projectionMode: "skipIndexingParentDocuments"` (NOT `generatedKeyAsId`).
+- [ ] AI Search skillset `authResourceId` uses `api://{appId}` with the actual GUID (NOT a friendly name).
+- [ ] AI Search skillset does NOT pass `page_number` as an input (SplitSkill chunks do not carry page numbers).
+- [ ] AI Search skillset does NOT use `authIdentity` — relies on AI Search system-assigned MI by default.
+- [ ] Entra ID app registration exists for the App Service with `api://{appId}` identifier URI.
+- [ ] Easy Auth v2 is enabled on the App Service with v1 issuer and dual audiences.
+- [ ] App Service has the indexer-skill .NET 8 code deployed.
+- [ ] Custom Web API skill returns `string.Empty` (not `null`) for optional fields when `hasRules = false`.
 - [ ] AI Search indexer, data source, skillset, and index are created from CLI/code.
 - [ ] All RBAC assignments from the table are applied.
 - [ ] AI Foundry hub + project are created and connected to existing OpenAI resource.
 - [ ] AI Foundry agents are created via v2 API using existing model deployments.
 - [ ] All embedding consumers use `text-embedding-3-large` consistently.
 - [ ] Bicep in `infra/` can recreate all infrastructure from scratch (excluding existing shared resources).
+- [ ] Storage upload script handles `publicNetworkAccess: Disabled` by temporarily enabling access.
 - [ ] Deployment scripts are idempotent and can be re-run safely.

@@ -26,9 +26,9 @@ Use the built-in Azure OpenAI skill in the indexer pipeline to call an Azure Ope
   "context": "/document/pages/*",
   "uri": "[Azure OpenAI endpoint]",
   "inputs": [
-    { "name": "content", "source": "/document/pages/*/content" },
+    { "name": "content", "source": "/document/pages/*" },
     { "name": "document_id", "source": "/document/metadata_storage_path" },
-    { "name": "page_number", "source": "/document/pages/*/pageNumber" }
+    { "name": "source_uri", "source": "/document/metadata_storage_path" }
   ],
   "outputs": [
     { "name": "RulesJson", "targetName": "rulesJson" }
@@ -66,10 +66,7 @@ Content-Type: application/json
       "data": {
         "content": "Applicants must be at least 18 years old...",
         "document_id": "doc123",
-        "source_uri": "https://contoso.com/policies/eligibility.pdf",
-        "page_number": 3,
-        "char_range": { "start": 123, "end": 456 },
-        "workflow_hint": "EligibilityRules"
+        "source_uri": "https://contoso.com/policies/eligibility.pdf"
       }
     }
   ]
@@ -83,12 +80,19 @@ Content-Type: application/json
     {
       "recordId": "1",
       "data": {
-        "rulesJson": "{\"hasRules\": true, \"WorkflowName\": \"EligibilityRules\", ...}"
+        "rulesJson": "{\"hasRules\": true, \"WorkflowName\": \"EligibilityRules\", ...}",
+        "hasRules": true,
+        "ruleCount": 3,
+        "workflowName": "EligibilityRules"
       }
     }
   ]
 }
 ```
+
+> **IMPORTANT — Null Safety:** When `hasRules = false`, the Web API MUST return `string.Empty` (not `null`) for `workflowName` and `rulesJson`. Null values in projected fields cause AI Search to emit warnings for every non-rule chunk.
+
+> **IMPORTANT — Authentication:** The skillset uses `authResourceId` set to `api://{appId}` (the Entra ID app registration GUID). AI Search authenticates using its **system-assigned managed identity** — do NOT specify `authIdentity` (which would require a user-assigned identity resource URI). The App Service must have Easy Auth v2 configured with a **v1 issuer** (`https://sts.windows.net/{tenantId}/`) and dual audiences (`api://{appId}` and raw `{appId}`).
 
 ## Recommendation
 **Use Option B (Custom Web API Skill)** for production workloads because:
@@ -105,6 +109,8 @@ Content-Type: application/json
 4. **Entity Recognition** (optional) — pre-identify entities
 5. **Rule Extraction** (Custom Web API Skill) — apply prompt contract
 6. **Embedding** — vectorize chunk content
+
+> **NOTE on `page_number`:** The SplitSkill's `textItems` output produces plain text chunks at `/document/pages/*` — it does NOT produce a `pageNumber` sub-field. Do NOT map `page_number` from `/document/pages/*` as this would send the chunk text (a string) where an integer is expected, causing deserialization failures in the Web API skill.
 7. **Version Stamping** — assign `RulesetVersion` and `SourceDocumentVersion` to each rule row
 8. **Index Projection** — write `Content`, `Vectorized_Content`, `RulesJson`, version fields to index
 

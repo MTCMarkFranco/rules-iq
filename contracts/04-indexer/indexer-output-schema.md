@@ -68,12 +68,14 @@ When `hasRules = false`:
 ```json
 {
   "hasRules": false,
-  "WorkflowName": null,
+  "WorkflowName": "",
   "RulesetVersion": null,
   "SourceDocumentVersion": null,
   "Rules": []
 }
 ```
+
+> **IMPORTANT:** `WorkflowName` MUST be empty string `""` (not `null`) when `hasRules = false`. The Web API skill returns `string.Empty` for optional string fields to prevent AI Search index projection warnings on non-rule chunks.
 
 ## Querying Rules from the Index
 

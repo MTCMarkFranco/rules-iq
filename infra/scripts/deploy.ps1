@@ -2,7 +2,8 @@
 .SYNOPSIS
     Master deployment script for Rules-IQ infrastructure.
 .DESCRIPTION
-    Deploys all Azure resources, configures existing services, and creates
+    Deploys all Azure resources, configures existing services, sets up
+    authentication, deploys app code, uploads documents, and creates
     data-plane objects. Uses managed identity auth — no API keys.
 #>
 
@@ -11,6 +12,9 @@ param(
     [string]$ResourceGroup = "rg-rules-iq",
     [string]$OpenAIResourceGroup = "RG-OpenAI",
     [switch]$SkipBicep,
+    [switch]$SkipAppAuth,
+    [switch]$SkipAppDeploy,
+    [switch]$SkipUpload,
     [switch]$SkipDataPlane,
     [switch]$SkipAgents
 )
@@ -47,9 +51,27 @@ if (-not $SkipBicep) {
     Write-Host "Bicep deployment completed." -ForegroundColor Green
 }
 
+# Phase 3.5: App Registration & Easy Auth
+if (-not $SkipAppAuth) {
+    Write-Host "`n--- Phase 3.5: App Registration & Easy Auth ---" -ForegroundColor Yellow
+    & "$PSScriptRoot\setup-app-auth.ps1" -ResourceGroup $ResourceGroup
+}
+
+# Phase 3.6: Build & Deploy Indexer Skill
+if (-not $SkipAppDeploy) {
+    Write-Host "`n--- Phase 3.6: Build & Deploy Indexer Skill ---" -ForegroundColor Yellow
+    & "$PSScriptRoot\deploy-app.ps1" -ResourceGroup $ResourceGroup
+}
+
 # Wait for RBAC propagation
 Write-Host "`nWaiting 60 seconds for RBAC propagation..." -ForegroundColor Yellow
 Start-Sleep -Seconds 60
+
+# Phase 4.5: Upload Policy Documents
+if (-not $SkipUpload) {
+    Write-Host "`n--- Phase 4.5: Upload Policy Documents ---" -ForegroundColor Yellow
+    & "$PSScriptRoot\upload-policy-docs.ps1"
+}
 
 # Phase 5: Data-Plane Objects
 if (-not $SkipDataPlane) {

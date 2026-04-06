@@ -1,0 +1,71 @@
+{
+  "name": "idx-rules-iq",
+  "fields": [
+    { "name": "id", "type": "Edm.String", "key": true, "filterable": true, "retrievable": true },
+    { "name": "Content", "type": "Edm.String", "searchable": true, "retrievable": true },
+    { "name": "Vectorized_Content", "type": "Collection(Edm.Single)", "searchable": true, "retrievable": false, "dimensions": 3072, "vectorSearchProfile": "vector-profile" },
+    { "name": "RulesJson", "type": "Edm.String", "searchable": true, "retrievable": true },
+    { "name": "HasRules", "type": "Edm.Boolean", "filterable": true, "retrievable": true },
+    { "name": "WorkflowName", "type": "Edm.String", "filterable": true, "retrievable": true },
+    { "name": "RuleCount", "type": "Edm.Int32", "filterable": true, "retrievable": true },
+    { "name": "SourceDocumentId", "type": "Edm.String", "filterable": true, "retrievable": true },
+    { "name": "SourceUri", "type": "Edm.String", "retrievable": true },
+    { "name": "SourceDocumentVersion", "type": "Edm.String", "filterable": true, "retrievable": true },
+    { "name": "RulesetVersion", "type": "Edm.String", "filterable": true, "retrievable": true },
+    { "name": "RulesetPublishedTimestamp", "type": "Edm.DateTimeOffset", "filterable": true, "retrievable": true },
+    { "name": "PageNumber", "type": "Edm.Int32", "filterable": true, "retrievable": true },
+    { "name": "SemanticLabel", "type": "Edm.String", "searchable": true, "filterable": true, "retrievable": true },
+    { "name": "IndexedTimestamp", "type": "Edm.DateTimeOffset", "filterable": true, "retrievable": true },
+    { "name": "SupersededBy", "type": "Edm.String", "filterable": true, "retrievable": true },
+    { "name": "parent_id", "type": "Edm.String", "filterable": true, "retrievable": true }
+  ],
+  "vectorSearch": {
+    "algorithms": [
+      {
+        "name": "hnsw-algorithm",
+        "kind": "hnsw",
+        "hnswParameters": {
+          "m": 4,
+          "efConstruction": 400,
+          "efSearch": 500,
+          "metric": "cosine"
+        }
+      }
+    ],
+    "vectorizers": [
+      {
+        "name": "openai-vectorizer",
+        "kind": "azureOpenAI",
+        "azureOpenAIParameters": {
+          "resourceUri": "https://rg-openai-hub.cognitiveservices.azure.com/",
+          "deploymentId": "text-embedding-3-large",
+          "modelName": "text-embedding-3-large"
+        }
+      }
+    ],
+    "profiles": [
+      {
+        "name": "vector-profile",
+        "algorithm": "hnsw-algorithm",
+        "vectorizer": "openai-vectorizer"
+      }
+    ]
+  },
+  "semantic": {
+    "configurations": [
+      {
+        "name": "semantic-config",
+        "prioritizedFields": {
+          "titleField": { "fieldName": "SemanticLabel" },
+          "contentFields": [
+            { "fieldName": "Content" }
+          ],
+          "keywordsFields": [
+            { "fieldName": "WorkflowName" },
+            { "fieldName": "RulesJson" }
+          ]
+        }
+      }
+    ]
+  }
+}

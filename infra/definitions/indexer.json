@@ -1,0 +1,21 @@
+{
+  "name": "ixr-policy-rules",
+  "dataSourceName": "ds-policy-documents",
+  "targetIndexName": "idx-rules-iq",
+  "skillsetName": "ss-rule-extraction",
+  "schedule": {
+    "interval": "PT24H"
+  },
+  "parameters": {
+    "configuration": {
+      "dataToExtract": "contentAndMetadata",
+      "parsingMode": "default",
+      "imageAction": "none"
+    }
+  },
+  "fieldMappings": [
+    { "sourceFieldName": "metadata_storage_path", "targetFieldName": "SourceUri" },
+    { "sourceFieldName": "metadata_storage_name", "targetFieldName": "SourceDocumentId" }
+  ],
+  "outputFieldMappings": []
+}

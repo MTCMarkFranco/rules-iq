@@ -1,0 +1,69 @@
+{
+  "name": "ss-rule-extraction",
+  "description": "Extract rules from policy chunks using custom Web API + OpenAI embeddings",
+  "skills": [
+    {
+      "@odata.type": "#Microsoft.Skills.Text.SplitSkill",
+      "name": "chunk-text",
+      "context": "/document",
+      "textSplitMode": "pages",
+      "maximumPageLength": 2000,
+      "pageOverlapLength": 200,
+      "inputs": [
+        { "name": "text", "source": "/document/content" }
+      ],
+      "outputs": [
+        { "name": "textItems", "targetName": "pages" }
+      ]
+    },
+    {
+      "@odata.type": "#Microsoft.Skills.Custom.WebApiSkill",
+      "name": "extract-rules",
+      "description": "Custom skill to extract RulesEngine rules from chunks",
+      "context": "/document/pages/*",
+      "uri": "https://app-rulesiq-indexer-skill.azurewebsites.net/api/extract-rules",
+      "httpMethod": "POST",
+      "authResourceId": "api://app-rulesiq-indexer-skill",
+      "authIdentity": {
+        "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity"
+      },
+      "batchSize": 1,
+      "degreeOfParallelism": 2,
+      "timeout": "PT60S",
+      "inputs": [
+        { "name": "content", "source": "/document/pages/*" },
+        { "name": "document_id", "source": "/document/metadata_storage_path" },
+        { "name": "source_uri", "source": "/document/metadata_storage_path" },
+        { "name": "page_number", "source": "/document/pages/*" }
+      ],
+      "outputs": [
+        { "name": "rulesJson", "targetName": "rulesJson" },
+        { "name": "hasRules", "targetName": "hasRules" },
+        { "name": "ruleCount", "targetName": "ruleCount" },
+        { "name": "workflowName", "targetName": "workflowName" }
+      ]
+    }
+  ],
+  "cognitiveServices": null,
+  "indexProjections": {
+    "selectors": [
+      {
+        "targetIndexName": "idx-rules-iq",
+        "parentKeyFieldName": "parent_id",
+        "sourceContext": "/document/pages/*",
+        "mappings": [
+          { "name": "Content", "source": "/document/pages/*" },
+          { "name": "RulesJson", "source": "/document/pages/*/rulesJson" },
+          { "name": "HasRules", "source": "/document/pages/*/hasRules" },
+          { "name": "RuleCount", "source": "/document/pages/*/ruleCount" },
+          { "name": "WorkflowName", "source": "/document/pages/*/workflowName" },
+          { "name": "SourceDocumentId", "source": "/document/metadata_storage_path" },
+          { "name": "SourceUri", "source": "/document/metadata_storage_path" }
+        ]
+      }
+    ],
+    "parameters": {
+      "projectionMode": "generatedKeyAsId"
+    }
+  }
+}

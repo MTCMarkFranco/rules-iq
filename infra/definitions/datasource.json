@@ -1,0 +1,15 @@
+{
+  "name": "ds-policy-documents",
+  "type": "azureblob",
+  "credentials": {
+    "connectionString": "ResourceId=/subscriptions/28d10200-70b0-476c-b004-c6ae29265897/resourceGroups/RG-OpenAI/providers/Microsoft.Storage/storageAccounts/sadatafileshubcanada;"
+  },
+  "container": {
+    "name": "policy-documents"
+  },
+  "dataDeletionDetectionPolicy": null,
+  "dataChangeDetectionPolicy": {
+    "@odata.type": "#Microsoft.Azure.Search.HighWaterMarkChangeDetectionPolicy",
+    "highWaterMarkColumnName": "metadata_storage_last_modified"
+  }
+}

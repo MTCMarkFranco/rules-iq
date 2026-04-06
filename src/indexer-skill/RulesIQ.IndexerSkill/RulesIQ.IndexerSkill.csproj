@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>RulesIQ.IndexerSkill</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.25" />
+    <PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared-models\RulesIQ.SharedModels\RulesIQ.SharedModels.csproj" />
+    <ProjectReference Include="..\..\infrastructure\RulesIQ.Infrastructure\RulesIQ.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

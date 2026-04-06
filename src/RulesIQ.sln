@@ -1,0 +1,72 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shared-models", "shared-models", "{7A5127DD-9881-4BD8-95CC-ED5EEDD05CB5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RulesIQ.SharedModels", "shared-models\RulesIQ.SharedModels\RulesIQ.SharedModels.csproj", "{E3BD226E-18B9-40D9-9989-B2264E1DB627}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "infrastructure", "infrastructure", "{186788CA-3717-4E54-8421-CC1DE2A93034}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RulesIQ.Infrastructure", "infrastructure\RulesIQ.Infrastructure\RulesIQ.Infrastructure.csproj", "{80682FBD-35FF-4E0F-A490-A0690CC1255B}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "indexer-skill", "indexer-skill", "{A6174A11-6746-4AD0-9091-B532C12ADCBF}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RulesIQ.IndexerSkill", "indexer-skill\RulesIQ.IndexerSkill\RulesIQ.IndexerSkill.csproj", "{3CDF18DD-489B-4F60-A28F-2D78FFFB3085}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "rules-normalizer", "rules-normalizer", "{B528AFFE-44D0-4EEC-B1C9-D4B9CF875F27}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RulesIQ.RulesNormalizer", "rules-normalizer\RulesIQ.RulesNormalizer\RulesIQ.RulesNormalizer.csproj", "{E4E4E303-8BC0-4216-9AA9-8FBDD6C7AE77}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "runtime-engine", "runtime-engine", "{649216E4-B59C-474D-B0AE-C74E02926422}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RulesIQ.RuntimeEngine", "runtime-engine\RulesIQ.RuntimeEngine\RulesIQ.RuntimeEngine.csproj", "{336117C8-68D3-4623-8F5A-1579A4461A9D}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ui-adapter", "ui-adapter", "{41B8264E-2BD7-49C7-9D52-3254483D88F1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RulesIQ.UIAdapter", "ui-adapter\RulesIQ.UIAdapter\RulesIQ.UIAdapter.csproj", "{0733CFBE-2756-40D2-888B-AD00B85DC7EF}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{E3BD226E-18B9-40D9-9989-B2264E1DB627}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3BD226E-18B9-40D9-9989-B2264E1DB627}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3BD226E-18B9-40D9-9989-B2264E1DB627}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3BD226E-18B9-40D9-9989-B2264E1DB627}.Release|Any CPU.Build.0 = Release|Any CPU
+		{80682FBD-35FF-4E0F-A490-A0690CC1255B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{80682FBD-35FF-4E0F-A490-A0690CC1255B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{80682FBD-35FF-4E0F-A490-A0690CC1255B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{80682FBD-35FF-4E0F-A490-A0690CC1255B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3CDF18DD-489B-4F60-A28F-2D78FFFB3085}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3CDF18DD-489B-4F60-A28F-2D78FFFB3085}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3CDF18DD-489B-4F60-A28F-2D78FFFB3085}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3CDF18DD-489B-4F60-A28F-2D78FFFB3085}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E4E4E303-8BC0-4216-9AA9-8FBDD6C7AE77}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E4E4E303-8BC0-4216-9AA9-8FBDD6C7AE77}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E4E4E303-8BC0-4216-9AA9-8FBDD6C7AE77}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E4E4E303-8BC0-4216-9AA9-8FBDD6C7AE77}.Release|Any CPU.Build.0 = Release|Any CPU
+		{336117C8-68D3-4623-8F5A-1579A4461A9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{336117C8-68D3-4623-8F5A-1579A4461A9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{336117C8-68D3-4623-8F5A-1579A4461A9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{336117C8-68D3-4623-8F5A-1579A4461A9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0733CFBE-2756-40D2-888B-AD00B85DC7EF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0733CFBE-2756-40D2-888B-AD00B85DC7EF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0733CFBE-2756-40D2-888B-AD00B85DC7EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0733CFBE-2756-40D2-888B-AD00B85DC7EF}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{E3BD226E-18B9-40D9-9989-B2264E1DB627} = {7A5127DD-9881-4BD8-95CC-ED5EEDD05CB5}
+		{80682FBD-35FF-4E0F-A490-A0690CC1255B} = {186788CA-3717-4E54-8421-CC1DE2A93034}
+		{3CDF18DD-489B-4F60-A28F-2D78FFFB3085} = {A6174A11-6746-4AD0-9091-B532C12ADCBF}
+		{E4E4E303-8BC0-4216-9AA9-8FBDD6C7AE77} = {B528AFFE-44D0-4EEC-B1C9-D4B9CF875F27}
+		{336117C8-68D3-4623-8F5A-1579A4461A9D} = {649216E4-B59C-474D-B0AE-C74E02926422}
+		{0733CFBE-2756-40D2-888B-AD00B85DC7EF} = {41B8264E-2BD7-49C7-9D52-3254483D88F1}
+	EndGlobalSection
+EndGlobal

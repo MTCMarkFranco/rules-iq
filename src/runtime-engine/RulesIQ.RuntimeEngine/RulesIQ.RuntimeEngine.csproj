@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>RulesIQ.RuntimeEngine</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RulesEngine" Version="5.0.3" />
+    <PackageReference Include="AutoMapper" Version="14.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared-models\RulesIQ.SharedModels\RulesIQ.SharedModels.csproj" />
+    <ProjectReference Include="..\..\infrastructure\RulesIQ.Infrastructure\RulesIQ.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

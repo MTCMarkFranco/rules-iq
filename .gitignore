@@ -1,0 +1,83 @@
+# =====================
+# .NET / C#
+# =====================
+bin/
+obj/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+*.userprefs
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Bb]uild/
+bld/
+[Oo]ut/
+publish/
+*.nupkg
+*.snupkg
+
+# NuGet
+**/[Pp]ackages/*
+!**/[Pp]ackages/build/
+*.nuget.props
+*.nuget.targets
+
+# Visual Studio
+.vs/
+*.rsuser
+*.csproj.user
+*.dbmdl
+*.jfm
+launchSettings.json
+!**/Properties/launchSettings.json
+
+# Rider / JetBrains
+.idea/
+*.sln.iml
+
+# =====================
+# Node.js / Playwright
+# =====================
+node_modules/
+test-results/
+playwright-report/
+blob-report/
+playwright/.cache/
+
+# =====================
+# OS files
+# =====================
+.DS_Store
+Thumbs.db
+Desktop.ini
+ehthumbs.db
+
+# =====================
+# IDE / Editor
+# =====================
+*.swp
+*.swo
+*~
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+
+# =====================
+# Azure / Infrastructure
+# =====================
+.azure/
+*.tfstate
+*.tfstate.*
+
+# =====================
+# Environment / Secrets
+# =====================
+.env
+.env.*
+!.env.example
+appsettings.local.json

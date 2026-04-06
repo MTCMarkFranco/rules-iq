@@ -1,0 +1,74 @@
+@page "/rules"
+
+<PageTitle>Rule Browser</PageTitle>
+
+<h2>Rule Browser</h2>
+<p>Browse the extracted rules from Canadian lending policy documents with full source document traceability.</p>
+
+<div class="alert alert-info">
+    <strong>Note:</strong> This page displays rules retrieved from the Azure AI Search index.
+    Connect to the search service to browse live rules.
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <strong>CanadianLoanEligibility</strong>
+        <span class="badge bg-secondary ms-2">v1.0.0</span>
+    </div>
+    <div class="card-body">
+        <table class="table table-striped table-sm">
+            <thead>
+                <tr>
+                    <th>Rule Name</th>
+                    <th>Expression</th>
+                    <th>Success Event</th>
+                    <th>Error Message</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>MinimumAgeRequirement</td>
+                    <td><code>input1.Age >= 18</code></td>
+                    <td>Applicant meets minimum age requirement</td>
+                    <td>Applicant must be at least 18 years of age</td>
+                </tr>
+                <tr>
+                    <td>ResidencyRequirement</td>
+                    <td><code>input1.ResidencyStatus == "Citizen" || ...</code></td>
+                    <td>Applicant meets residency requirement</td>
+                    <td>Must be citizen, PR, or work permit holder</td>
+                </tr>
+                <tr>
+                    <td>MinimumIncomeRequirement</td>
+                    <td><code>input1.AnnualIncome >= 25000</code></td>
+                    <td>Meets minimum income</td>
+                    <td>Gross annual income must be at least $25,000 CAD</td>
+                </tr>
+                <tr>
+                    <td>MaxGrossDebtServiceRatio</td>
+                    <td><code>input1.GDS &lt;= 39</code></td>
+                    <td>GDS ratio within limit</td>
+                    <td>GDS ratio must not exceed 39%</td>
+                </tr>
+                <tr>
+                    <td>MaxTotalDebtServiceRatio</td>
+                    <td><code>input1.TDS &lt;= 44</code></td>
+                    <td>TDS ratio within limit</td>
+                    <td>TDS ratio must not exceed 44%</td>
+                </tr>
+                <tr>
+                    <td>MinimumCreditScore</td>
+                    <td><code>input1.CreditScore >= 650</code></td>
+                    <td>Meets minimum credit score</td>
+                    <td>Credit score must be at least 650</td>
+                </tr>
+                <tr>
+                    <td>MinimumEmploymentDuration</td>
+                    <td><code>input1.EmploymentDurationMonths >= 6</code></td>
+                    <td>Meets employment duration</td>
+                    <td>Must be employed for at least 6 months</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>

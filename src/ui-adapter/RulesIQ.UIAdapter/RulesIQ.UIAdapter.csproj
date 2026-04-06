@@ -1,0 +1,17 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <RootNamespace>RulesIQ.UIAdapter</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RulesEngineEditor" Version="1.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared-models\RulesIQ.SharedModels\RulesIQ.SharedModels.csproj" />
+    <ProjectReference Include="..\..\runtime-engine\RulesIQ.RuntimeEngine\RulesIQ.RuntimeEngine.csproj" />
+    <ProjectReference Include="..\..\infrastructure\RulesIQ.Infrastructure\RulesIQ.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

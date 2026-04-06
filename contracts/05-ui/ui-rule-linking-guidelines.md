@@ -97,3 +97,44 @@ When exporting rules from the UI:
 - Include `RulesetVersion` in the export so the version lineage is preserved.
 - Optionally export as a human-readable report (Markdown or PDF) for governance review.
 - Compliance evaluation results should be exportable as a separate JSON document including the full `ComplianceScore`, `VersionFingerprint`, and `RulesSnapshot`.
+
+## Playwright End-to-End Test — Loan Eligibility (Canada)
+
+> **After the entire Rules-IQ system is built and the loan eligibility rules are indexed, a Playwright end-to-end test MUST be generated to validate the complete flow through the UI.**
+
+### Test Scenario
+The test uses the **Canonical Test Persona** defined in [meta-loan-eligibility-canada.md](../07-meta/meta-loan-eligibility-canada.md) — a fictitious Ontario mortgage applicant with a GDS ratio of 41.5% that intentionally exceeds the OSFI B-20 limit of 39%.
+
+### Test Steps (Contract — Not a Script)
+1. **Navigate** to the Rules-IQ Blazor UI home page.
+2. **Select** the "Loan Eligibility" evaluation workflow.
+3. **Enter** the Canonical Test Persona data into the evaluation form:
+   - Age: 34, Province: ON, Residency: PermanentResident
+   - Income: $92,000, GDS: 41.5%, TDS: 43.0%
+   - Credit Score: 710, Employment: Employed (28 months)
+   - Loan: $485,000, Property: $625,000, Down Payment: 22.4%, LTV: 77.6%
+   - Loan Type: Mortgage, Lender: FederallyRegulated
+4. **Submit** the evaluation.
+5. **Assert** the compliance percentage is displayed prominently and is **less than 100%**.
+6. **Assert** the compliance panel is color-coded **yellow** (50–79%) or **red** (< 50%) — NOT green.
+7. **Assert** the `MaxGrossDebtServiceRatio` rule card shows a ❌ Failed status with the expected error message referencing the 39% GDS limit.
+8. **Assert** the failed rule card has at least one source document link referencing OSFI B-20.
+9. **Assert** the failed rule card displays a snippet from the OSFI B-20 policy text.
+10. **Assert** the Ruleset Version (e.g., `v1.0.0`) and Evaluation Timestamp are visible in the evaluation result panel.
+11. **Assert** the "Rules Snapshot" section is expandable and lists all evaluated rules with their expressions and pass/fail results.
+12. **Assert** the export button produces a valid JSON file containing `ComplianceScore`, `VersionFingerprint`, and `RulesSnapshot`.
+13. **Capture** a screenshot of the compliance dashboard for the test report.
+
+### Assertions Summary
+| # | Assertion | Expected |
+|---|-----------|----------|
+| 1 | Compliance % visible | Yes, < 100% |
+| 2 | Color indicator | Yellow or Red |
+| 3 | GDS rule failed | ❌ with error message |
+| 4 | Source link present | OSFI B-20 link visible |
+| 5 | Policy snippet shown | OSFI B-20 text excerpt |
+| 6 | Version displayed | `v1.0.0` + timestamp |
+| 7 | Rules Snapshot expandable | All rules listed |
+| 8 | Export produces valid JSON | Schema-compliant |
+
+> **Do NOT generate the Playwright test script until the system is fully operational.** This section is an instruction contract — the test script should be generated at that time using these assertions as the specification.

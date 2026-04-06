@@ -187,3 +187,47 @@ Every evaluation MUST produce a compliance score representing the percentage of 
 - [ ] The output includes a `ComplianceScore` with total, passed, failed counts and a percentage.
 - [ ] The output includes a `RulesSnapshot` containing every rule used and its result, stamped with the ruleset version.
 - [ ] The JSON output is structured for UI consumption — the AI agent produces this as the primary output format.
+
+## First Evaluation Scenario — Loan Eligibility (Canada)
+
+> **The loan eligibility domain is the FIRST runtime evaluation to execute after the indexing pipeline has processed the 8 Canadian regulatory PDFs.**
+
+### Canonical Test Persona
+Use this fictitious applicant as the primary end-to-end validation case. See [meta-loan-eligibility-canada.md](../07-meta/meta-loan-eligibility-canada.md) for the full entity model.
+
+```json
+{
+  "Age": 34,
+  "Province": "ON",
+  "ResidencyStatus": "PermanentResident",
+  "AnnualIncome": 92000.00,
+  "GDS": 41.5,
+  "TDS": 43.0,
+  "CreditScore": 710,
+  "EmploymentStatus": "Employed",
+  "EmploymentDurationMonths": 28,
+  "LoanAmount": 485000.00,
+  "PropertyValue": 625000.00,
+  "DownPaymentPercent": 22.4,
+  "LTV": 77.6,
+  "LoanType": "Mortgage",
+  "LenderType": "FederallyRegulated"
+}
+```
+
+### Expected Evaluation Behavior
+1. **Rule Retrieval** — query the `rules-index` with the evaluation context (loan type: Mortgage, jurisdiction: Ontario, lender type: FederallyRegulated). Expect rules from OSFI B-20, B-21, FCAC, and FSRA Ontario documents.
+2. **Input Mapping** — map the test persona properties directly to the RulesEngine `input` object (1:1 mapping, no external lookups needed for this test case).
+3. **Rule Execution** — execute the `CanadianLoanEligibility` workflow via Microsoft RulesEngine.
+4. **Expected Failure** — the `MaxGrossDebtServiceRatio` rule MUST fail because `GDS = 41.5` exceeds the 39% limit defined in OSFI B-20.
+5. **Compliance Score** — the result MUST produce a `CompliancePercentage` less than 100%, with `MaxGrossDebtServiceRatio` listed in `FailedRules`.
+6. **Version Fingerprint** — the result MUST include `RulesetVersion: "v1.0.0"` and source document versions for all contributing documents.
+7. **Rules Snapshot** — the result MUST contain a complete snapshot of all evaluated rules with their expressions and pass/fail results.
+
+### Validation Criteria
+- [ ] The runtime engine retrieves relevant rules from the search index using the evaluation context.
+- [ ] The Canonical Test Persona input maps correctly to the RulesEngine input model.
+- [ ] The `MaxGrossDebtServiceRatio` rule fails as expected.
+- [ ] The compliance percentage is less than 100%.
+- [ ] The output JSON conforms to the schema defined in this contract (MappingPlan, ExecutionPlan, ResiliencePlan, VersionFingerprint, ComplianceScore, RulesSnapshot).
+- [ ] The result is consumable by the UI adapter for display in the compliance dashboard.

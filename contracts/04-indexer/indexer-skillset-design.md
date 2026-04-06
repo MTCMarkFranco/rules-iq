@@ -127,3 +127,38 @@ When a new version of a source document is ingested (e.g., OSFI B-21 Rev 2025 re
   - **Minor** — new rules added, no existing rules removed
   - **Patch** — minor corrections or metadata updates
 - The pipeline orchestrator is responsible for version assignment; the AI enrichment skill simply propagates the version it receives.
+
+## First Pipeline Run — Loan Eligibility (Canada)
+
+> **The loan eligibility meta-contract is the FIRST domain to be pushed through the indexing pipeline after infrastructure deployment.**
+
+### Source Documents
+Upload the following 8 PDFs from `C:\rules-iq\meta-contracts\loan-eligibility\` to the `policy-documents` blob container in `sadatafileshubcanada`:
+
+1. `OSFI-Guideline-B20-Residential-Mortgage-Underwriting.pdf`
+2. `OSFI-Guideline-B21-Mortgage-Insurance-Underwriting.pdf`
+3. `FCAC-CG9-Mortgage-Prepayment-Penalty-Disclosure.pdf`
+4. `FCAC-Commissioner-Guidance-Overview.pdf`
+5. `FCAC-Guideline-Appropriate-Products-Services-Banks.pdf`
+6. `FCAC-Guideline-Mortgage-Loans-Exceptional-Circumstances.pdf`
+7. `FSRA-Ontario-CU0063INT-Residential-Mortgage-Lending.pdf`
+8. `FSRA-Ontario-Guidance-Overview-Credit-Unions.pdf`
+
+### Execution Steps
+1. Upload all 8 PDFs to blob storage using managed identity auth (az cli or SDK — no keys).
+2. Trigger the indexer `idx-policy-rules` — this runs the full skillset pipeline.
+3. Monitor indexer status via `az rest` or the Search REST API until all documents are processed.
+4. Validate the `rules-index` contains rules extracted from each document — expect rules in categories: Minimum Age, Residency, Income, GDS/TDS, Employment, Credit Score, LTV, Stress Test, Down Payment, Provincial Exceptions.
+5. Run a semantic search query (e.g., "mortgage stress test qualifying rate") to confirm semantic ranker returns relevant rules.
+
+### Initial Version Assignment
+- `SourceDocumentVersion`: use the document's own revision identifier (e.g., `"B-20 Rev 2024"`, `"CG-9 2022"`).
+- `RulesetVersion`: `"v1.0.0"` — this is the initial extraction.
+- `RulesetPublishedTimestamp`: set to the indexer run timestamp.
+
+### Validation Criteria
+- [ ] All 8 documents are cracked, chunked, and processed without indexer errors.
+- [ ] Extracted rules are valid RulesEngine JSON conforming to the workflow schema.
+- [ ] Each rule has traceability metadata (source_uri, page_number, char_range).
+- [ ] Vector embeddings (3072-dim) are present for all indexed chunks.
+- [ ] Semantic search returns relevant results for loan eligibility queries.

@@ -23,18 +23,14 @@
       "context": "/document/pages/*",
       "uri": "https://app-rulesiq-indexer-skill.azurewebsites.net/api/extract-rules",
       "httpMethod": "POST",
-      "authResourceId": "api://app-rulesiq-indexer-skill",
-      "authIdentity": {
-        "@odata.type": "#Microsoft.Azure.Search.DataUserAssignedIdentity"
-      },
+      "authResourceId": "api://512c962b-55aa-4d13-a9fd-e4fa5888c1e5",
       "batchSize": 1,
       "degreeOfParallelism": 2,
       "timeout": "PT60S",
       "inputs": [
         { "name": "content", "source": "/document/pages/*" },
         { "name": "document_id", "source": "/document/metadata_storage_path" },
-        { "name": "source_uri", "source": "/document/metadata_storage_path" },
-        { "name": "page_number", "source": "/document/pages/*" }
+        { "name": "source_uri", "source": "/document/metadata_storage_path" }
       ],
       "outputs": [
         { "name": "rulesJson", "targetName": "rulesJson" },
@@ -63,7 +59,7 @@
       }
     ],
     "parameters": {
-      "projectionMode": "generatedKeyAsId"
+      "projectionMode": "skipIndexingParentDocuments"
     }
   }
 }

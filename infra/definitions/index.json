@@ -1,7 +1,7 @@
 {
   "name": "idx-rules-iq",
   "fields": [
-    { "name": "id", "type": "Edm.String", "key": true, "filterable": true, "retrievable": true },
+    { "name": "id", "type": "Edm.String", "key": true, "filterable": true, "retrievable": true, "analyzer": "keyword" },
     { "name": "Content", "type": "Edm.String", "searchable": true, "retrievable": true },
     { "name": "Vectorized_Content", "type": "Collection(Edm.Single)", "searchable": true, "retrievable": false, "dimensions": 3072, "vectorSearchProfile": "vector-profile" },
     { "name": "RulesJson", "type": "Edm.String", "searchable": true, "retrievable": true },
@@ -57,10 +57,10 @@
         "name": "semantic-config",
         "prioritizedFields": {
           "titleField": { "fieldName": "SemanticLabel" },
-          "contentFields": [
+          "prioritizedContentFields": [
             { "fieldName": "Content" }
           ],
-          "keywordsFields": [
+          "prioritizedKeywordsFields": [
             { "fieldName": "WorkflowName" },
             { "fieldName": "RulesJson" }
           ]

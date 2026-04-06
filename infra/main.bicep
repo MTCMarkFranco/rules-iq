@@ -75,7 +75,6 @@ module aiFoundryHub 'modules/ai-foundry-hub.bicep' = {
     searchServiceName: searchServiceName
     searchResourceGroupName: openAIResourceGroupName
   }
-  dependsOn: [hubStorage, managedIdentity]
 }
 
 // Phase 3: AI Foundry Project
@@ -87,7 +86,6 @@ module aiFoundryProject 'modules/ai-foundry-project.bicep' = {
     hubId: aiFoundryHub.outputs.hubId
     location: location
   }
-  dependsOn: [aiFoundryHub]
 }
 
 // Phase 4: RBAC Assignments (AI Search system MI must already be enabled
@@ -102,7 +100,7 @@ module rbac 'modules/rbac-assignments.bicep' = {
     appServicePrincipalId: appService.outputs.principalId
     managedIdentityPrincipalId: managedIdentity.outputs.principalId
   }
-  dependsOn: [appService, aiFoundryHub, managedIdentity]
+  dependsOn: [aiFoundryHub]
 }
 
 output resourceGroupName string = resourceGroupName

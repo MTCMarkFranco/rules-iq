@@ -332,7 +332,7 @@ The index schema is defined in the [indexer-output-schema.md](../contracts/04-in
         ]
       }
     ],
-    "parameters": { "projectionMode": "generatedKeyAsId" }
+    "parameters": { "projectionMode": "skipIndexingParentDocuments" }
   }
 }
 ```
@@ -419,6 +419,7 @@ infra/
   ├── scripts/
   │     ├── deploy.ps1            # Master deployment script
   │     ├── configure-search.ps1  # Configure existing search service
+  │     ├── upload-policy-docs.ps1 # Upload PDFs (handles network access + container creation)
   │     ├── create-index.ps1      # Create AI Search index (data-plane)
   │     ├── create-indexer.ps1    # Create data source, skillset, indexer
   │     └── create-agents.ps1    # Create AI Foundry agents (v2 API)

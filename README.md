@@ -71,13 +71,11 @@ You can skip phases with flags: `-SkipBicep`, `-SkipDataPlane`, `-SkipAgents`.
 Upload the 8 Canadian regulatory PDFs to blob storage:
 
 ```powershell
-az storage blob upload-batch `
-    --account-name sadatafileshubcanada `
-    --destination policy-documents `
-    --source "C:\rules-iq\meta-contracts\loan-eligibility" `
-    --auth-mode login `
-    --pattern "*.pdf"
+cd infra/scripts
+.\upload-policy-docs.ps1
 ```
+
+The script automatically handles storage accounts with `publicNetworkAccess: Disabled` by temporarily enabling access for the upload and re-disabling it afterward. It also creates the `policy-documents` container if it doesn't exist.
 
 The indexer runs on a 24-hour schedule, or trigger it manually:
 
@@ -138,7 +136,7 @@ npx playwright show-report
     /ui-adapter                # Blazor Server UI with compliance dashboard
 /infra
     /modules                   # Bicep modules (7 files)
-    /scripts                   # PowerShell deployment scripts (5 files)
+    /scripts                   # PowerShell deployment scripts (6 files)
     /definitions               # AI Search index/skillset/indexer + agent definitions
 /tests
     /e2e                       # Playwright end-to-end tests

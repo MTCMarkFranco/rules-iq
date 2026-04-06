@@ -50,7 +50,7 @@ public sealed class ExtractRulesController : ControllerBase
                         RulesJson = JsonSerializer.Serialize(rulesPayload),
                         HasRules = result.HasRules,
                         RuleCount = result.Workflow?.Rules.Count ?? 0,
-                        WorkflowName = result.Workflow?.WorkflowName
+                        WorkflowName = result.Workflow?.WorkflowName ?? string.Empty
                     }
                 });
             }
@@ -60,7 +60,7 @@ public sealed class ExtractRulesController : ControllerBase
                 response.Values.Add(new SkillsetResponseRecord
                 {
                     RecordId = record.RecordId,
-                    Data = new SkillsetResponseData { HasRules = false, RuleCount = 0 },
+                    Data = new SkillsetResponseData { HasRules = false, RuleCount = 0, WorkflowName = string.Empty, RulesJson = string.Empty },
                     Errors = [new SkillsetError { Message = ex.Message }]
                 });
             }

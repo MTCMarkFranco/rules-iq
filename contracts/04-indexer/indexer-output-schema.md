@@ -19,7 +19,7 @@ Every ruleset in the index MUST be stampable with a version identifier. When the
 
 | Field Name | Type | Description | Searchable | Filterable | Retrievable |
 |------------|------|-------------|------------|------------|-------------|
-| `id` | `Edm.String` | Unique row identifier (chunk_id) | No | Yes | Yes |
+| `id` | `Edm.String` | Unique row identifier (chunk_id). **Must use `keyword` analyzer** (required by index projections). | No | Yes | Yes |
 | `Content` | `Edm.String` | Raw text of the indexed chunk | Yes | No | Yes |
 | `Vectorized_Content` | `Collection(Edm.Single)` | Vector embedding of the chunk (1536 or 3072 dimensions) | Yes (vector) | No | No |
 | `RulesJson` | `Edm.String` | JSON string containing the RulesEngine workflow fragment | Yes | No | Yes |

@@ -1,0 +1,18 @@
+{
+  "values": [
+    {
+      "recordId": "chunk-001",
+      "data": {
+        "content": "To qualify for a personal loan under this program, applicants must meet all of the following requirements:\n\n1. The applicant must be at least 18 years of age (19 in British Columbia, New Brunswick, Nova Scotia, Newfoundland and Labrador, Northwest Territories, Nunavut, and Yukon).\n\n2. The applicant must be a Canadian citizen, a permanent resident of Canada, or hold a valid work permit with at least 12 months remaining.\n\n3. The applicant's gross annual income must be at least $25,000 CAD.\n\n4. The applicant's Gross Debt Service (GDS) ratio must not exceed 39%.\n\n5. The applicant's Total Debt Service (TDS) ratio must not exceed 44%.\n\n6. The applicant must have a minimum credit score of 650.\n\n7. The applicant must have been employed in their current position for a minimum of 6 months.",
+        "document_id": "policy-doc-2024-001",
+        "source_uri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+        "page_number": 3,
+        "char_range": {
+          "start": 1024,
+          "end": 2048
+        },
+        "workflow_hint": "CanadianLoanEligibility"
+      }
+    }
+  ]
+}

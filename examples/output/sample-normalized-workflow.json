@@ -1,0 +1,158 @@
+{
+  "WorkflowName": "CanadianLoanEligibility",
+  "Rules": [
+    {
+      "RuleName": "MinimumAgeRequirement",
+      "Expression": "input.Age >= 18",
+      "SuccessEvent": "Applicant meets minimum age requirement",
+      "ErrorMessage": "Applicant must be at least 18 years of age",
+      "RuleExpressionType": "LambdaExpression",
+      "LocalParams": [],
+      "Actions": [],
+      "Metadata": {
+        "SourceDocuments": [
+          {
+            "SourceDocumentId": "policy-doc-2024-001",
+            "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "PageNumber": 3,
+            "CharRange": { "Start": 1024, "End": 1200 }
+          }
+        ]
+      }
+    },
+    {
+      "RuleName": "MinimumAgeRequirementProvincial",
+      "Expression": "(input.Province == \"BC\" || input.Province == \"NB\" || input.Province == \"NS\" || input.Province == \"NL\" || input.Province == \"NT\" || input.Province == \"NU\" || input.Province == \"YT\") ? input.Age >= 19 : input.Age >= 18",
+      "SuccessEvent": "Applicant meets provincial minimum age requirement",
+      "ErrorMessage": "Applicant does not meet provincial minimum age requirement (19 in BC, NB, NS, NL, NT, NU, YT; 18 elsewhere)",
+      "RuleExpressionType": "LambdaExpression",
+      "LocalParams": [],
+      "Actions": [],
+      "Metadata": {
+        "SourceDocuments": [
+          {
+            "SourceDocumentId": "policy-doc-2024-001",
+            "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "PageNumber": 3,
+            "CharRange": { "Start": 1024, "End": 1200 }
+          }
+        ]
+      }
+    },
+    {
+      "RuleName": "ResidencyRequirement",
+      "Expression": "input.ResidencyStatus == \"Citizen\" || input.ResidencyStatus == \"PermanentResident\" || (input.ResidencyStatus == \"WorkPermit\" && input.WorkPermitRemainingMonths >= 12)",
+      "SuccessEvent": "Applicant meets residency requirement",
+      "ErrorMessage": "Applicant must be a Canadian citizen, permanent resident, or hold a valid work permit with at least 12 months remaining",
+      "RuleExpressionType": "LambdaExpression",
+      "LocalParams": [],
+      "Actions": [],
+      "Metadata": {
+        "SourceDocuments": [
+          {
+            "SourceDocumentId": "policy-doc-2024-001",
+            "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "PageNumber": 3,
+            "CharRange": { "Start": 1200, "End": 1400 }
+          }
+        ]
+      }
+    },
+    {
+      "RuleName": "MinimumIncomeRequirement",
+      "Expression": "input.AnnualIncome >= 25000",
+      "SuccessEvent": "Applicant meets minimum income requirement",
+      "ErrorMessage": "Applicant gross annual income must be at least $25,000 CAD",
+      "RuleExpressionType": "LambdaExpression",
+      "LocalParams": [],
+      "Actions": [],
+      "Metadata": {
+        "SourceDocuments": [
+          {
+            "SourceDocumentId": "policy-doc-2024-001",
+            "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "PageNumber": 3,
+            "CharRange": { "Start": 1400, "End": 1550 }
+          }
+        ]
+      }
+    },
+    {
+      "RuleName": "MaxGrossDebtServiceRatio",
+      "Expression": "input.GDS <= 39",
+      "SuccessEvent": "GDS ratio within acceptable limit",
+      "ErrorMessage": "Applicant GDS ratio must not exceed 39%",
+      "RuleExpressionType": "LambdaExpression",
+      "LocalParams": [],
+      "Actions": [],
+      "Metadata": {
+        "SourceDocuments": [
+          {
+            "SourceDocumentId": "policy-doc-2024-001",
+            "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "PageNumber": 3,
+            "CharRange": { "Start": 1550, "End": 1650 }
+          }
+        ]
+      }
+    },
+    {
+      "RuleName": "MaxTotalDebtServiceRatio",
+      "Expression": "input.TDS <= 44",
+      "SuccessEvent": "TDS ratio within acceptable limit",
+      "ErrorMessage": "Applicant TDS ratio must not exceed 44%",
+      "RuleExpressionType": "LambdaExpression",
+      "LocalParams": [],
+      "Actions": [],
+      "Metadata": {
+        "SourceDocuments": [
+          {
+            "SourceDocumentId": "policy-doc-2024-001",
+            "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "PageNumber": 3,
+            "CharRange": { "Start": 1650, "End": 1750 }
+          }
+        ]
+      }
+    },
+    {
+      "RuleName": "MinimumCreditScore",
+      "Expression": "input.CreditScore >= 650",
+      "SuccessEvent": "Applicant meets minimum credit score",
+      "ErrorMessage": "Applicant credit score must be at least 650",
+      "RuleExpressionType": "LambdaExpression",
+      "LocalParams": [],
+      "Actions": [],
+      "Metadata": {
+        "SourceDocuments": [
+          {
+            "SourceDocumentId": "policy-doc-2024-001",
+            "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "PageNumber": 3,
+            "CharRange": { "Start": 1750, "End": 1850 }
+          }
+        ]
+      }
+    },
+    {
+      "RuleName": "MinimumEmploymentDuration",
+      "Expression": "input.EmploymentDurationMonths >= 6",
+      "SuccessEvent": "Applicant meets minimum employment duration",
+      "ErrorMessage": "Applicant must have been employed for at least 6 months in current position",
+      "RuleExpressionType": "LambdaExpression",
+      "LocalParams": [],
+      "Actions": [],
+      "Metadata": {
+        "SourceDocuments": [
+          {
+            "SourceDocumentId": "policy-doc-2024-001",
+            "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "PageNumber": 3,
+            "CharRange": { "Start": 1850, "End": 2000 }
+          }
+        ]
+      }
+    }
+  ],
+  "NormalizationNotes": "Normalized 7 candidate rules from 1 source chunk. Added a provincial age rule (MinimumAgeRequirementProvincial) to handle the age-of-majority difference across provinces. All rules use LambdaExpression type. No duplicate rules found across candidate workflows. The discretionary exception clause was excluded from rule generation as it is non-deterministic. Self-employed income verification and self-employed employment duration rules are noted for future extraction from additional policy chunks."
+}

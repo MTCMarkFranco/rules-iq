@@ -1,0 +1,114 @@
+{
+  "hasRules": true,
+  "workflow": {
+    "WorkflowName": "CanadianLoanEligibility",
+    "Rules": [
+      {
+        "RuleName": "MinimumAgeRequirement",
+        "Expression": "input.Age >= 18",
+        "SuccessEvent": "Applicant meets minimum age requirement",
+        "ErrorMessage": "Applicant must be at least 18 years of age",
+        "Metadata": {
+          "SourceDocumentId": "policy-doc-2024-001",
+          "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "PageNumber": 3,
+          "CharRange": {
+            "Start": 1024,
+            "End": 1200
+          }
+        }
+      },
+      {
+        "RuleName": "ResidencyRequirement",
+        "Expression": "input.ResidencyStatus == \"Citizen\" || input.ResidencyStatus == \"PermanentResident\" || (input.ResidencyStatus == \"WorkPermit\" && input.WorkPermitRemainingMonths >= 12)",
+        "SuccessEvent": "Applicant meets residency requirement",
+        "ErrorMessage": "Applicant must be a Canadian citizen, permanent resident, or hold a valid work permit with at least 12 months remaining",
+        "Metadata": {
+          "SourceDocumentId": "policy-doc-2024-001",
+          "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "PageNumber": 3,
+          "CharRange": {
+            "Start": 1200,
+            "End": 1400
+          }
+        }
+      },
+      {
+        "RuleName": "MinimumIncomeRequirement",
+        "Expression": "input.AnnualIncome >= 25000",
+        "SuccessEvent": "Applicant meets minimum income requirement",
+        "ErrorMessage": "Applicant gross annual income must be at least $25,000 CAD",
+        "Metadata": {
+          "SourceDocumentId": "policy-doc-2024-001",
+          "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "PageNumber": 3,
+          "CharRange": {
+            "Start": 1400,
+            "End": 1550
+          }
+        }
+      },
+      {
+        "RuleName": "MaxGrossDebtServiceRatio",
+        "Expression": "input.GDS <= 39",
+        "SuccessEvent": "GDS ratio within acceptable limit",
+        "ErrorMessage": "Applicant GDS ratio must not exceed 39%",
+        "Metadata": {
+          "SourceDocumentId": "policy-doc-2024-001",
+          "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "PageNumber": 3,
+          "CharRange": {
+            "Start": 1550,
+            "End": 1650
+          }
+        }
+      },
+      {
+        "RuleName": "MaxTotalDebtServiceRatio",
+        "Expression": "input.TDS <= 44",
+        "SuccessEvent": "TDS ratio within acceptable limit",
+        "ErrorMessage": "Applicant TDS ratio must not exceed 44%",
+        "Metadata": {
+          "SourceDocumentId": "policy-doc-2024-001",
+          "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "PageNumber": 3,
+          "CharRange": {
+            "Start": 1650,
+            "End": 1750
+          }
+        }
+      },
+      {
+        "RuleName": "MinimumCreditScore",
+        "Expression": "input.CreditScore >= 650",
+        "SuccessEvent": "Applicant meets minimum credit score",
+        "ErrorMessage": "Applicant credit score must be at least 650",
+        "Metadata": {
+          "SourceDocumentId": "policy-doc-2024-001",
+          "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "PageNumber": 3,
+          "CharRange": {
+            "Start": 1750,
+            "End": 1850
+          }
+        }
+      },
+      {
+        "RuleName": "MinimumEmploymentDuration",
+        "Expression": "input.EmploymentDurationMonths >= 6",
+        "SuccessEvent": "Applicant meets minimum employment duration",
+        "ErrorMessage": "Applicant must have been employed for at least 6 months in current position",
+        "Metadata": {
+          "SourceDocumentId": "policy-doc-2024-001",
+          "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "PageNumber": 3,
+          "CharRange": {
+            "Start": 1850,
+            "End": 2000
+          }
+        }
+      }
+    ]
+  },
+  "extractionNotes": "Extracted 7 rules from Section 3.2 Eligibility Criteria. Note: The minimum age is 18 in most provinces but 19 in BC, NB, NS, NL, NT, NU, YT — the base rule uses 18; provincial exceptions should be handled as separate rules or during normalization. Self-employed income calculation (2-year average) and employment duration (2 years continuous) are noted but require separate self-employment rules. The discretionary exception clause at the end ('at the sole discretion of the committee') was NOT converted into a rule as it is non-deterministic."
+}

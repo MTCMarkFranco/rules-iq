@@ -9,6 +9,13 @@ The RulesEngine UI MUST be based on the **RulesEngineEditor** Blazor component l
 - The editor supports real-time evaluation, drag-and-drop rule ordering, import/export of workflow JSON, nested rule support, and Entity Framework persistence.
 - If the NuGet package is insufficient (e.g., custom compliance views, version display panels), fork the repository and maintain changes in a separate branch. Document all deviations.
 
+### Live Index Integration
+The UI MUST retrieve rules dynamically from the Azure AI Search index at runtime — rules MUST NOT be hardcoded in the UI layer:
+- **Evaluate page**: Calls `IRuleRetrievalService.RetrieveWorkflowAsync(workflowName)` to fetch the current rules from the search index before executing evaluation via `IRuleEvaluationService`.
+- **Rule Browser page**: Calls `IRuleRetrievalService.RetrieveWorkflowAsync(workflowName)` on page load to display the current indexed rules dynamically.
+- If no rules are found in the index, the UI MUST display a clear error message (not an empty or broken state).
+- This ensures that when policy PDFs are re-indexed with updated rules, the UI immediately reflects the changes without code changes or redeployment.
+
 ### Compliance Visibility
 The UI MUST display a compliance score (percentage) for every document/request evaluation, showing how compliant the input is against the evaluated rules.
 

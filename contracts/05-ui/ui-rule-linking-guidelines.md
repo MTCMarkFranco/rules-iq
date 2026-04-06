@@ -12,6 +12,13 @@ The UI MUST be built on the **RulesEngineEditor** Blazor component library (or a
 - Supports 2-way binding of Workflows, Entity Framework persistence, real-time evaluation, and import/export of compliant JSON.
 - Custom extensions (compliance panels, version displays) should be built as Blazor components that integrate with the `RulesEngineEditorPage` component.
 
+### Live Index Integration
+All UI pages that display or evaluate rules MUST retrieve them live from the Azure AI Search index:
+- **Evaluate page**: Uses `IRuleRetrievalService.RetrieveWorkflowAsync(workflowName)` to fetch rules before evaluation. No hardcoded rules.
+- **Rule Browser page**: Uses `IRuleRetrievalService.RetrieveWorkflowAsync(workflowName)` on page load to populate the rules table dynamically.
+- The rules displayed and evaluated always reflect the latest indexer output — re-indexing policy PDFs automatically updates the UI without redeployment.
+- If the index returns no rules, show a clear user-facing message (e.g., "No rules found in the search index").
+
 ### Compliance Scoring Display
 The UI MUST prominently display a compliance score (percentage) for every document/request evaluation. Users must immediately see how compliant their input is against the rules.
 

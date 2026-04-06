@@ -34,7 +34,8 @@ public sealed class RuleEvaluationService : IRuleEvaluationService
             workflow.WorkflowName, workflow.Rules.Count);
 
         var rulesEngineWorkflow = ConvertToRulesEngineWorkflow(workflow);
-        var rulesEngine = new RulesEngine.RulesEngine([rulesEngineWorkflow]);
+        var reSettings = new ReSettings { EnableExceptionAsErrorMessage = true };
+        var rulesEngine = new RulesEngine.RulesEngine([rulesEngineWorkflow], reSettings);
 
         var results = await rulesEngine.ExecuteAllRulesAsync(workflow.WorkflowName, input);
 

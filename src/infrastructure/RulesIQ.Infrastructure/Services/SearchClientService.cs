@@ -12,6 +12,7 @@ namespace RulesIQ.Infrastructure.Services;
 public interface ISearchClientService
 {
     Task<List<SearchDocument>> SearchRulesAsync(string workflowName, CancellationToken cancellationToken = default);
+    Task<List<SearchDocument>> SearchAllRulesAsync(CancellationToken cancellationToken = default);
     Task<List<SearchDocument>> SearchRulesByDocumentAsync(string documentId, CancellationToken cancellationToken = default);
 }
 
@@ -48,6 +49,27 @@ public sealed class SearchClientService : ISearchClientService
         }
 
         _logger.LogInformation("Found {Count} rule chunks for workflow {WorkflowName}", results.Count, workflowName);
+        return results;
+    }
+
+    public async Task<List<SearchDocument>> SearchAllRulesAsync(CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Searching all rules in the index");
+        var searchOptions = new SearchOptions
+        {
+            Filter = "HasRules eq true",
+            Select = { "RulesJson", "Content", "SourceUri", "PageNumber", "RulesetVersion", "SourceDocumentVersion", "SourceDocumentId", "WorkflowName" },
+            Size = 1000
+        };
+
+        var results = new List<SearchDocument>();
+        var response = await _searchClient.SearchAsync<SearchDocument>("*", searchOptions, cancellationToken);
+        await foreach (var result in response.Value.GetResultsAsync())
+        {
+            results.Add(result.Document);
+        }
+
+        _logger.LogInformation("Found {Count} rule chunks in index", results.Count);
         return results;
     }
 

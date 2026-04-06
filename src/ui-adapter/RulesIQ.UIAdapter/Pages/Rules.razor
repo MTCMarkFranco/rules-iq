@@ -1,74 +1,83 @@
 @page "/rules"
+@using RulesIQ.RuntimeEngine.Services
+@inject IRuleRetrievalService RetrievalService
 
 <PageTitle>Rule Browser</PageTitle>
 
 <h2>Rule Browser</h2>
 <p>Browse the extracted rules from Canadian lending policy documents with full source document traceability.</p>
 
-<div class="alert alert-info">
-    <strong>Note:</strong> This page displays rules retrieved from the Azure AI Search index.
-    Connect to the search service to browse live rules.
-</div>
+@if (_loading)
+{
+    <div class="d-flex align-items-center">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        <span>Loading rules from the search index...</span>
+    </div>
+}
+else if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+else if (_workflow is not null)
+{
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <div>
+                <strong>@_workflow.WorkflowName</strong>
+                <span class="badge bg-secondary ms-2">@(_workflow.RulesetVersion ?? "N/A")</span>
+            </div>
+            <small class="text-muted">@_workflow.Rules.Count rules &middot; Last indexed: @(_workflow.RulesetPublishedTimestamp?.ToString("yyyy-MM-dd HH:mm") ?? "N/A")</small>
+        </div>
+        <div class="card-body">
+            <table class="table table-striped table-sm">
+                <thead>
+                    <tr>
+                        <th>Rule Name</th>
+                        <th>Expression</th>
+                        <th>Success Event</th>
+                        <th>Error Message</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var rule in _workflow.Rules.OrderBy(r => r.RuleName))
+                    {
+                        <tr>
+                            <td>@rule.RuleName</td>
+                            <td><code>@rule.Expression</code></td>
+                            <td>@rule.SuccessEvent</td>
+                            <td>@rule.ErrorMessage</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}
+else
+{
+    <div class="alert alert-warning">No rules found in the search index.</div>
+}
 
-<div class="card">
-    <div class="card-header">
-        <strong>CanadianLoanEligibility</strong>
-        <span class="badge bg-secondary ms-2">v1.0.0</span>
-    </div>
-    <div class="card-body">
-        <table class="table table-striped table-sm">
-            <thead>
-                <tr>
-                    <th>Rule Name</th>
-                    <th>Expression</th>
-                    <th>Success Event</th>
-                    <th>Error Message</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>MinimumAgeRequirement</td>
-                    <td><code>input1.Age >= 18</code></td>
-                    <td>Applicant meets minimum age requirement</td>
-                    <td>Applicant must be at least 18 years of age</td>
-                </tr>
-                <tr>
-                    <td>ResidencyRequirement</td>
-                    <td><code>input1.ResidencyStatus == "Citizen" || ...</code></td>
-                    <td>Applicant meets residency requirement</td>
-                    <td>Must be citizen, PR, or work permit holder</td>
-                </tr>
-                <tr>
-                    <td>MinimumIncomeRequirement</td>
-                    <td><code>input1.AnnualIncome >= 25000</code></td>
-                    <td>Meets minimum income</td>
-                    <td>Gross annual income must be at least $25,000 CAD</td>
-                </tr>
-                <tr>
-                    <td>MaxGrossDebtServiceRatio</td>
-                    <td><code>input1.GDS &lt;= 39</code></td>
-                    <td>GDS ratio within limit</td>
-                    <td>GDS ratio must not exceed 39%</td>
-                </tr>
-                <tr>
-                    <td>MaxTotalDebtServiceRatio</td>
-                    <td><code>input1.TDS &lt;= 44</code></td>
-                    <td>TDS ratio within limit</td>
-                    <td>TDS ratio must not exceed 44%</td>
-                </tr>
-                <tr>
-                    <td>MinimumCreditScore</td>
-                    <td><code>input1.CreditScore >= 650</code></td>
-                    <td>Meets minimum credit score</td>
-                    <td>Credit score must be at least 650</td>
-                </tr>
-                <tr>
-                    <td>MinimumEmploymentDuration</td>
-                    <td><code>input1.EmploymentDurationMonths >= 6</code></td>
-                    <td>Meets employment duration</td>
-                    <td>Must be employed for at least 6 months</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-</div>
+@code {
+    private NormalizedWorkflow? _workflow;
+    private string? _error;
+    private bool _loading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            _workflow = await RetrievalService.RetrieveAllRulesAsync();
+            if (_workflow.Rules.Count == 0)
+                _workflow = null;
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to load rules: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+}

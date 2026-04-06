@@ -8,6 +8,7 @@ namespace RulesIQ.RuntimeEngine.Services;
 public interface IRuleRetrievalService
 {
     Task<NormalizedWorkflow> RetrieveWorkflowAsync(string workflowName, CancellationToken cancellationToken = default);
+    Task<NormalizedWorkflow> RetrieveAllRulesAsync(CancellationToken cancellationToken = default);
 }
 
 public sealed class RuleRetrievalService : IRuleRetrievalService
@@ -19,6 +20,76 @@ public sealed class RuleRetrievalService : IRuleRetrievalService
     {
         _searchClient = searchClient;
         _logger = logger;
+    }
+
+    public async Task<NormalizedWorkflow> RetrieveAllRulesAsync(CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Retrieving all rules from search index");
+
+        var documents = await _searchClient.SearchAllRulesAsync(cancellationToken);
+
+        var allRules = new List<NormalizedRule>();
+        string? rulesetVersion = null;
+        string? sourceDocumentVersion = null;
+        DateTimeOffset? publishedTimestamp = null;
+
+        foreach (var doc in documents)
+        {
+            if (doc.TryGetValue("RulesJson", out var rulesJsonObj) && rulesJsonObj is string rulesJsonStr)
+            {
+                var payload = JsonSerializer.Deserialize<IndexRulesPayload>(rulesJsonStr);
+                if (payload is { HasRules: true })
+                {
+                    rulesetVersion ??= payload.RulesetVersion;
+                    sourceDocumentVersion ??= payload.SourceDocumentVersion;
+                    publishedTimestamp ??= payload.RulesetPublishedTimestamp;
+
+                    foreach (var rule in payload.Rules)
+                    {
+                        allRules.Add(new NormalizedRule
+                        {
+                            RuleName = rule.RuleName,
+                            Expression = rule.Expression,
+                            SuccessEvent = rule.SuccessEvent,
+                            ErrorMessage = rule.ErrorMessage,
+                            RuleExpressionType = rule.RuleExpressionType,
+                            Metadata = new NormalizedRuleMetadata
+                            {
+                                SourceDocuments =
+                                [
+                                    new SourceDocumentMetadata
+                                    {
+                                        SourceDocumentId = rule.Metadata.SourceDocumentId,
+                                        SourceUri = rule.Metadata.SourceUri,
+                                        SourceDocumentVersion = rule.Metadata.SourceDocumentVersion,
+                                        PageNumber = rule.Metadata.PageNumber,
+                                        CharRange = rule.Metadata.CharRange
+                                    }
+                                ]
+                            }
+                        });
+                    }
+                }
+            }
+        }
+
+        // Deduplicate by RuleName — multiple index chunks can produce rules with the same name.
+        // Keep the first occurrence of each rule name.
+        var deduped = allRules
+            .GroupBy(r => r.RuleName)
+            .Select(g => g.First())
+            .ToList();
+
+        _logger.LogInformation("Retrieved {Count} total rules from index ({Deduped} after dedup)", allRules.Count, deduped.Count);
+
+        return new NormalizedWorkflow
+        {
+            WorkflowName = "AllIndexedRules",
+            RulesetVersion = rulesetVersion,
+            SourceDocumentVersion = sourceDocumentVersion,
+            RulesetPublishedTimestamp = publishedTimestamp,
+            Rules = deduped
+        };
     }
 
     public async Task<NormalizedWorkflow> RetrieveWorkflowAsync(string workflowName, CancellationToken cancellationToken = default)

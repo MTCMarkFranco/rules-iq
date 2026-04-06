@@ -2,6 +2,7 @@
 @using RulesIQ.RuntimeEngine.Services
 @using RulesIQ.UIAdapter.Services
 @inject IRuleEvaluationService EvaluationService
+@inject IRuleRetrievalService RetrievalService
 @inject ITraceabilityService TraceabilityService
 
 <PageTitle>Loan Eligibility Evaluation</PageTitle>
@@ -136,7 +137,14 @@
 
         try
         {
-            var workflow = GetSampleWorkflow();
+            var workflow = await RetrievalService.RetrieveAllRulesAsync();
+
+            if (workflow.Rules.Count == 0)
+            {
+                _error = "No rules found in the search index. Ensure the indexer has run.";
+                return;
+            }
+
             _result = await EvaluationService.EvaluateAsync(
                 workflow, _input, "Determine loan eligibility for personal loan application");
         }
@@ -148,82 +156,5 @@
         {
             _evaluating = false;
         }
-    }
-
-    private static NormalizedWorkflow GetSampleWorkflow()
-    {
-        return new NormalizedWorkflow
-        {
-            WorkflowName = "CanadianLoanEligibility",
-            RulesetVersion = "v1.0.0",
-            SourceDocumentVersion = "2024.1",
-            RulesetPublishedTimestamp = DateTimeOffset.UtcNow,
-            Rules =
-            [
-                new NormalizedRule
-                {
-                    RuleName = "MinimumAgeRequirement",
-                    Expression = "input1.Age >= 18",
-                    SuccessEvent = "Applicant meets minimum age requirement",
-                    ErrorMessage = "Applicant must be at least 18 years of age",
-                    RuleExpressionType = "LambdaExpression",
-                    Metadata = new NormalizedRuleMetadata { SourceDocuments = [new SourceDocumentMetadata { SourceDocumentId = "OSFI-B20", SourceUri = "osfi-b20.pdf", PageNumber = 3 }] }
-                },
-                new NormalizedRule
-                {
-                    RuleName = "ResidencyRequirement",
-                    Expression = "input1.ResidencyStatus == \"Citizen\" || input1.ResidencyStatus == \"PermanentResident\" || (input1.ResidencyStatus == \"WorkPermit\")",
-                    SuccessEvent = "Applicant meets residency requirement",
-                    ErrorMessage = "Applicant must be a Canadian citizen, permanent resident, or hold a valid work permit",
-                    RuleExpressionType = "LambdaExpression",
-                    Metadata = new NormalizedRuleMetadata { SourceDocuments = [new SourceDocumentMetadata { SourceDocumentId = "OSFI-B20", SourceUri = "osfi-b20.pdf", PageNumber = 4 }] }
-                },
-                new NormalizedRule
-                {
-                    RuleName = "MinimumIncomeRequirement",
-                    Expression = "input1.AnnualIncome >= 25000",
-                    SuccessEvent = "Applicant meets minimum income requirement",
-                    ErrorMessage = "Applicant gross annual income must be at least $25,000 CAD",
-                    RuleExpressionType = "LambdaExpression",
-                    Metadata = new NormalizedRuleMetadata { SourceDocuments = [new SourceDocumentMetadata { SourceDocumentId = "OSFI-B20", SourceUri = "osfi-b20.pdf", PageNumber = 5 }] }
-                },
-                new NormalizedRule
-                {
-                    RuleName = "MaxGrossDebtServiceRatio",
-                    Expression = "input1.GDS <= 39",
-                    SuccessEvent = "GDS ratio within acceptable limit",
-                    ErrorMessage = "Applicant GDS ratio must not exceed 39%",
-                    RuleExpressionType = "LambdaExpression",
-                    Metadata = new NormalizedRuleMetadata { SourceDocuments = [new SourceDocumentMetadata { SourceDocumentId = "OSFI-B20", SourceUri = "osfi-b20.pdf", PageNumber = 6 }] }
-                },
-                new NormalizedRule
-                {
-                    RuleName = "MaxTotalDebtServiceRatio",
-                    Expression = "input1.TDS <= 44",
-                    SuccessEvent = "TDS ratio within acceptable limit",
-                    ErrorMessage = "Applicant TDS ratio must not exceed 44%",
-                    RuleExpressionType = "LambdaExpression",
-                    Metadata = new NormalizedRuleMetadata { SourceDocuments = [new SourceDocumentMetadata { SourceDocumentId = "OSFI-B20", SourceUri = "osfi-b20.pdf", PageNumber = 6 }] }
-                },
-                new NormalizedRule
-                {
-                    RuleName = "MinimumCreditScore",
-                    Expression = "input1.CreditScore >= 650",
-                    SuccessEvent = "Applicant meets minimum credit score",
-                    ErrorMessage = "Applicant credit score must be at least 650",
-                    RuleExpressionType = "LambdaExpression",
-                    Metadata = new NormalizedRuleMetadata { SourceDocuments = [new SourceDocumentMetadata { SourceDocumentId = "OSFI-B20", SourceUri = "osfi-b20.pdf", PageNumber = 7 }] }
-                },
-                new NormalizedRule
-                {
-                    RuleName = "MinimumEmploymentDuration",
-                    Expression = "input1.EmploymentDurationMonths >= 6",
-                    SuccessEvent = "Applicant meets minimum employment duration",
-                    ErrorMessage = "Applicant must have been employed for at least 6 months",
-                    RuleExpressionType = "LambdaExpression",
-                    Metadata = new NormalizedRuleMetadata { SourceDocuments = [new SourceDocumentMetadata { SourceDocumentId = "OSFI-B20", SourceUri = "osfi-b20.pdf", PageNumber = 8 }] }
-                }
-            ]
-        };
     }
 }

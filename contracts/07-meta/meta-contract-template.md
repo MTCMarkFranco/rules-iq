@@ -19,6 +19,8 @@ Describe the domain (e.g., "Loan Eligibility in Canada", "Travel Insurance Cover
 - `regulatory_context`: applicable regulatory framework(s).
 - `exceptions_context`: known exceptions or special cases in this domain.
 - `metadata`: standard chunk metadata (document_id, source_uri, page_number, char_range).
+- `source_document_version` (optional): version of the source document (e.g., "2024.1", "Rev 2025").
+- `ruleset_version` (optional): semantic version of the ruleset (e.g., "v2.1.0").
 
 ## Expected Output
 A RulesEngine workflow with domain-specific rule types, following the standard schema:
@@ -28,6 +30,8 @@ A RulesEngine workflow with domain-specific rule types, following the standard s
   "hasRules": true,
   "workflow": {
     "WorkflowName": "[DomainWorkflowName]",
+    "RulesetVersion": "[e.g., v1.0.0]",
+    "SourceDocumentVersion": "[e.g., 2024.1]",
     "Rules": [
       {
         "RuleName": "[DomainSpecificRuleName]",

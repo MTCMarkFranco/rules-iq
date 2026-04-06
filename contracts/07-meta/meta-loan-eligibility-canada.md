@@ -16,6 +16,8 @@ Define how to extract, normalize, and validate rules for **Canadian Loan Eligibi
 - `regulatory_context`: applicable regulatory framework (e.g., "OSFI B-20", "FCAC Code of Conduct").
 - `lender_type` (optional): "federally regulated" or "provincially regulated".
 - `metadata`: standard chunk metadata (document_id, source_uri, page_number, char_range).
+- `source_document_version` (optional): version of the source document (e.g., "B-20 Rev 2024", "B-21 Rev 2025").
+- `ruleset_version` (optional): semantic version of the ruleset (e.g., "v2.1.0").
 
 ## Expected Output
 A RulesEngine workflow with Canadian lending rules, such as:
@@ -25,6 +27,8 @@ A RulesEngine workflow with Canadian lending rules, such as:
   "hasRules": true,
   "workflow": {
     "WorkflowName": "CanadianLoanEligibility",
+    "RulesetVersion": "v2.1.0",
+    "SourceDocumentVersion": "B-20 Rev 2024",
     "Rules": [
       {
         "RuleName": "MinimumAgeRequirement",
@@ -52,6 +56,11 @@ A RulesEngine workflow with Canadian lending rules, such as:
   "extractionNotes": "Extracted 3 rules from OSFI B-20 guideline section on debt service ratios."
 }
 ```
+
+**Note:** When OSFI updates a guideline (e.g., B-20 is revised), the pipeline should:
+1. Ingest the new PDF with an incremented `source_document_version` (e.g., `"B-20 Rev 2025"`).
+2. Assign a new `ruleset_version` (e.g., `"v3.0.0"`).
+3. Replace all existing rules for that `SourceDocumentId` in the index.
 
 ## Rule Categories
 The following categories of rules are expected when processing Canadian lending policy documents:

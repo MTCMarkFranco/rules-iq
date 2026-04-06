@@ -11,6 +11,7 @@
         "Metadata": {
           "SourceDocumentId": "policy-doc-2024-001",
           "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "SourceDocumentVersion": "2024.1",
           "PageNumber": 3,
           "CharRange": {
             "Start": 1024,
@@ -26,6 +27,7 @@
         "Metadata": {
           "SourceDocumentId": "policy-doc-2024-001",
           "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "SourceDocumentVersion": "2024.1",
           "PageNumber": 3,
           "CharRange": {
             "Start": 1200,
@@ -41,6 +43,7 @@
         "Metadata": {
           "SourceDocumentId": "policy-doc-2024-001",
           "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "SourceDocumentVersion": "2024.1",
           "PageNumber": 3,
           "CharRange": {
             "Start": 1400,
@@ -56,6 +59,7 @@
         "Metadata": {
           "SourceDocumentId": "policy-doc-2024-001",
           "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "SourceDocumentVersion": "2024.1",
           "PageNumber": 3,
           "CharRange": {
             "Start": 1550,
@@ -71,6 +75,7 @@
         "Metadata": {
           "SourceDocumentId": "policy-doc-2024-001",
           "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "SourceDocumentVersion": "2024.1",
           "PageNumber": 3,
           "CharRange": {
             "Start": 1650,
@@ -86,6 +91,7 @@
         "Metadata": {
           "SourceDocumentId": "policy-doc-2024-001",
           "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "SourceDocumentVersion": "2024.1",
           "PageNumber": 3,
           "CharRange": {
             "Start": 1750,
@@ -101,6 +107,7 @@
         "Metadata": {
           "SourceDocumentId": "policy-doc-2024-001",
           "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+          "SourceDocumentVersion": "2024.1",
           "PageNumber": 3,
           "CharRange": {
             "Start": 1850,
@@ -110,5 +117,7 @@
       }
     ]
   },
+  "RulesetVersion": "v1.0.0",
+  "SourceDocumentVersion": "2024.1",
   "extractionNotes": "Extracted 7 rules from Section 3.2 Eligibility Criteria. Note: The minimum age is 18 in most provinces but 19 in BC, NB, NS, NL, NT, NU, YT — the base rule uses 18; provincial exceptions should be handled as separate rules or during normalization. Self-employed income calculation (2-year average) and employment duration (2 years continuous) are noted but require separate self-employment rules. The discretionary exception clause at the end ('at the sole discretion of the committee') was NOT converted into a rule as it is non-deterministic."
 }

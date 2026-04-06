@@ -8,6 +8,8 @@
   - `candidateWorkflows`: array of workflow objects from previous step (each with `WorkflowName`, `Rules`, `Metadata`, `extractionNotes`).
   - `targetWorkflowName`: optional string to unify multiple candidate workflows under a single workflow name.
   - `domain_context`: optional domain description (e.g., "mortgage underwriting").
+  - `source_document_version`: optional string identifying the version of the source document (e.g., "2024.1").
+  - `ruleset_version`: optional string for the semantic version of the ruleset (e.g., "v2.1.0").
 - **RulesEngine expectations (high level):**
   - A workflow is a JSON object with:
     - `WorkflowName` (string)
@@ -21,6 +23,9 @@
 ```json
 {
   "WorkflowName": "EligibilityRules",
+  "RulesetVersion": "v2.1.0",
+  "SourceDocumentVersion": "2024.1",
+  "RulesetPublishedTimestamp": "2025-03-15T10:30:00Z",
   "Rules": [
     {
       "RuleName": "MinimumAgeRequirement",
@@ -35,6 +40,7 @@
           {
             "SourceDocumentId": "doc123",
             "SourceUri": "https://contoso.com/policies/eligibility.pdf",
+            "SourceDocumentVersion": "2024.1",
             "PageNumber": 3,
             "CharRange": {
               "Start": 123,
@@ -52,6 +58,14 @@
 - **`WorkflowName`**:
   - If `targetWorkflowName` is provided, use it.
   - Otherwise, infer a stable, descriptive name from the candidate workflows.
+- **`RulesetVersion`**:
+  - If `ruleset_version` is provided, include it in the output.
+  - This version is propagated through the pipeline and used for fingerprinting at runtime.
+- **`SourceDocumentVersion`**:
+  - If `source_document_version` is provided, include it at the top level and in each rule's `Metadata.SourceDocuments` entries.
+- **`RulesetPublishedTimestamp`**:
+  - Set to the current timestamp when the normalized workflow is produced.
+  - This marks when this version of the ruleset became active.
 - **`Rules`**:
   - Deduplicated, normalized, and merged where appropriate.
   - Each rule MUST be syntactically valid and executable by RulesEngine.
@@ -78,6 +92,10 @@
   - You MUST NOT introduce side effects or external dependencies.
 - **Metadata preservation:**
   - You MUST preserve traceability back to all source chunks that contributed to each rule.
+  - You MUST preserve `SourceDocumentVersion` in each `SourceDocuments` entry.
+- **Version propagation:**
+  - If `ruleset_version` or `source_document_version` is provided, you MUST include them in the output.
+  - The normalized workflow is the final authoritative artifact before indexing — it must carry all version information.
 - **RuleExpressionType:**
   - Default to `"LambdaExpression"` unless there is a clear reason to use another supported type.
 
@@ -100,3 +118,6 @@
 - [ ] Every rule includes at least one `SourceDocuments` entry in `Metadata`.
 - [ ] No rule introduces invented conditions or thresholds not present in the candidate rules.
 - [ ] `RuleExpressionType` is set consistently and appropriately (default `"LambdaExpression"`).
+- [ ] `RulesetVersion` and `SourceDocumentVersion` are present in the output if provided in the input.
+- [ ] `RulesetPublishedTimestamp` is set to the normalization timestamp.
+- [ ] `SourceDocumentVersion` is preserved in every `Metadata.SourceDocuments` entry.

@@ -13,6 +13,8 @@
   - `char_range` (object, if available): `{ "start": int, "end": int }`.
   - Optional: `existing_rules_column` (string, if re-indexing or updating).
   - Optional: `workflow_hint` (string, e.g., "EligibilityRules", "CoverageRules").
+  - Optional: `source_document_version` (string, e.g., "2024.1", "B-21 Rev 2025").
+  - Optional: `ruleset_version` (string, e.g., "v2.1.0") — assigned by the pipeline orchestrator.
 - **Index schema (conceptual):**
   - `Content` (string) — the raw chunk text
   - `Vectorized_Content` (vector) — embedding of the chunk
@@ -25,6 +27,8 @@
 {
   "hasRules": true,
   "WorkflowName": "EligibilityRules",
+  "RulesetVersion": "v2.1.0",
+  "SourceDocumentVersion": "2024.1",
   "Rules": [
     {
       "RuleName": "MinimumAgeRequirement",
@@ -34,6 +38,7 @@
       "Metadata": {
         "SourceDocumentId": "doc123",
         "SourceUri": "https://contoso.com/policies/eligibility.pdf",
+        "SourceDocumentVersion": "2024.1",
         "PageNumber": 3,
         "CharRange": {
           "Start": 123,
@@ -47,6 +52,8 @@
 
 - If `hasRules = false`, `WorkflowName` MUST be `null` and `Rules` MUST be an empty array `[]`.
 - If `hasRules = true`, `WorkflowName` MUST be set (use `workflow_hint` if provided, otherwise infer from content).
+- If `ruleset_version` is provided, include it as `RulesetVersion` in the output. If not provided, omit the field (the pipeline orchestrator will assign it).
+- If `source_document_version` is provided, include it as `SourceDocumentVersion` in the output and in each rule's `Metadata`.
 
 ## Constraints
 - **Deterministic decision:**
@@ -68,10 +75,11 @@
   - Output: `hasRules = false`, explainable by the fact that the chunk is a pointer, not a rule.
 - **Chunk partially describes a rule:**
   - If critical parameters are missing, prefer `hasRules = false` and let another chunk carry the rule.
-- **Existing rules present:**
+- **Existing rules present (document version update):**
   - If `existing_rules_column` is provided, you MAY:
     - Preserve it if the chunk content has not changed.
     - Replace it if the chunk content has changed significantly (this decision is typically made by the orchestrating code, not you).
+  - When a new version of a source document is ingested, the pipeline orchestrator will increment `ruleset_version` and `source_document_version`. The enrichment skill should include these in the output so the index is properly versioned.
 - **Empty or whitespace-only content:**
   - Output: `hasRules = false`, `WorkflowName = null`, `Rules = []`.
 

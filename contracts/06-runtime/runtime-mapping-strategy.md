@@ -2,6 +2,17 @@
 
 This document describes the strategy for mapping data from document chunks and external systems into the RulesEngine input model at runtime.
 
+## Core Tenets
+
+### Rules Engine Foundation
+The runtime MUST use the **Microsoft RulesEngine** NuGet package (or a fork if modifications are required):
+- **NuGet:** https://www.nuget.org/packages/RulesEngine/
+- **Repository:** https://github.com/microsoft/RulesEngine
+- All workflow JSON consumed at runtime MUST conform to the [RulesEngine workflow schema](https://github.com/microsoft/RulesEngine/blob/main/schema/workflow-schema.json).
+
+### Version-Aware Execution
+The runtime MUST be version-aware: every execution must know which ruleset version it is running against, and stamp the results accordingly. Rules retrieved from the search index carry a `RulesetVersion` field — the runtime must propagate this through to the evaluation output.
+
 ## Mapping Architecture
 
 ### AutoMapper Integration
@@ -14,8 +25,10 @@ Document Chunk (raw text)
 Extracted Fields (dictionary or DTO)
     ↓ [AutoMapper Profile]
 RulesEngine Input Model (strongly-typed object)
+    ↓ [Load Versioned Rules from Index]
+Versioned RulesEngine Workflow (with RulesetVersion)
     ↓ [RulesEngine.ExecuteAllRulesAsync]
-Rule Results
+Rule Results + Version Fingerprint + Compliance Score
 ```
 
 ### Mapping Sources
@@ -83,3 +96,35 @@ Before passing the mapped input to RulesEngine:
 | External system unavailable | Polly retry/circuit breaker, degrade gracefully |
 | Rule expression invalid | Log error, flag rule for review, do not execute |
 | No rules found in index | Return empty result set with explanation |
+| Ruleset version mismatch | Log warning, use latest available version, record discrepancy in output |
+
+## Version Fingerprinting at Runtime
+After rule execution, the runtime MUST produce a version fingerprint attached to every result:
+
+| Field | Source | Description |
+|-------|--------|-------------|
+| `RulesetVersion` | Index field on retrieved rules | Semantic version of the ruleset (e.g., `v2.1.0`) |
+| `SourceDocumentVersions` | Index metadata | Array of source document IDs and their versions |
+| `EvaluationTimestamp` | System clock | ISO 8601 timestamp of when the evaluation was executed |
+
+This fingerprint is included in the `VersionFingerprint` section of the evaluation output JSON.
+
+## Compliance Score Calculation
+After all rules have been evaluated, the runtime MUST compute a compliance score:
+
+```
+CompliancePercentage = (RulesPassed / TotalRulesEvaluated) * 100
+```
+
+- Round to 2 decimal places.
+- Include the count of total, passed, and failed rules.
+- Include the list of failed rule names and their error messages.
+- This is included in the `ComplianceScore` section of the evaluation output JSON.
+
+## Rules Snapshot for Audit
+The evaluation output MUST include a `RulesSnapshot` object containing:
+- The complete list of rules that were evaluated (name, expression, result).
+- The `RulesetVersion` at the time of evaluation.
+- The `WorkflowName` that was executed.
+
+This snapshot ensures that even if rules are updated later, the exact rules used for any historical evaluation can be reconstructed.

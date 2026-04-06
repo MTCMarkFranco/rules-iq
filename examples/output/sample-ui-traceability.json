@@ -9,5 +9,8 @@
       "Snippet": "The applicant must be at least 18 years of age (19 in British Columbia, New Brunswick, Nova Scotia, Newfoundland and Labrador, Northwest Territories, Nunavut, and Yukon)."
     }
   ],
-  "TraceabilitySummary": "This rule was derived from 1 source document (Personal Loan Eligibility Policy 2024, page 3). The original text explicitly states a minimum age of 18, with provincial exceptions for provinces where the age of majority is 19."
+  "TraceabilitySummary": "This rule was derived from 1 source document (Personal Loan Eligibility Policy 2024, page 3). The original text explicitly states a minimum age of 18, with provincial exceptions for provinces where the age of majority is 19.",
+  "RulesetVersion": "v1.0.0",
+  "SourceDocumentVersion": "2024.1",
+  "RulesetPublishedTimestamp": "2025-03-15T10:30:00Z"
 }

@@ -1,5 +1,20 @@
 # Prompt Contract: Rule–Document Traceability Mapping (UI Metadata)
 
+## Core Tenets
+
+### UI Foundation
+The RulesEngine UI MUST be based on the **RulesEngineEditor** Blazor component library (or a fork of the repository if modifications are required):
+- **NuGet:** https://www.nuget.org/packages/RulesEngineEditor/
+- **Repository:** https://github.com/alexreich/RulesEngineEditor
+- The editor supports real-time evaluation, drag-and-drop rule ordering, import/export of workflow JSON, nested rule support, and Entity Framework persistence.
+- If the NuGet package is insufficient (e.g., custom compliance views, version display panels), fork the repository and maintain changes in a separate branch. Document all deviations.
+
+### Compliance Visibility
+The UI MUST display a compliance score (percentage) for every document/request evaluation, showing how compliant the input is against the evaluated rules.
+
+### Version Traceability
+The UI MUST display the ruleset version used for each evaluation, and allow users to see exactly which rules (and which versions of those rules) were applied.
+
 ## Inputs
 - **Context:**
   - The RulesEngine UI (via `RulesEngineEditor` NuGet package) must display:
@@ -31,7 +46,9 @@
       "Snippet": "Applicants must be at least 18 years of age to qualify for this program..."
     }
   ],
-  "TraceabilitySummary": "This rule was derived from 1 source document (Policy Document, page 3). The original text explicitly states a minimum age of 18."
+  "TraceabilitySummary": "This rule was derived from 1 source document (Policy Document, page 3). The original text explicitly states a minimum age of 18.",
+  "RulesetVersion": "v2.1.0",
+  "RulesetPublishedTimestamp": "2025-03-15T10:30:00Z"
 }
 ```
 
@@ -46,6 +63,12 @@
     - `Snippet`: a short excerpt from `RawChunkText` around the `CharRange`.
 - **`TraceabilitySummary`**:
   - One or two sentences explaining where this rule came from and how many documents/pages support it.
+- **`RulesetVersion`**:
+  - The semantic version of the ruleset this rule belongs to (e.g., `"v2.1.0"`).
+  - Displayed in the UI alongside each rule so users know which version of the policy produced it.
+- **`RulesetPublishedTimestamp`**:
+  - ISO 8601 timestamp of when this ruleset version was published/indexed.
+  - Helps users understand the currency of the rules.
 
 ## Constraints
 - **No URL guessing beyond pattern:**
@@ -79,3 +102,4 @@
 - [ ] `TraceabilitySummary` is concise and understandable by a business user.
 - [ ] `DisplayLabel` is human-readable and describes the rule's intent.
 - [ ] No invented URLs or fabricated snippet text.
+- [ ] `RulesetVersion` and `RulesetPublishedTimestamp` are present and accurately reflect the ruleset version.

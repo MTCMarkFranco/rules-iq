@@ -7,6 +7,7 @@
   - `source_uri` (string URL or file path)
   - `ingestion_timestamp` (ISO 8601)
   - `file_type` (string, e.g., "pdf", "docx", "html", "md")
+  - `document_version` (string, optional, version of the source document, e.g., "2024.1", "B-21 Rev 2025")
 - **`chunking_parameters`**:
   - `max_tokens` (int, maximum tokens per chunk)
   - `semantic_boundaries` (array of boundary types: headings, paragraphs, sections)

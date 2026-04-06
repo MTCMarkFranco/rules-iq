@@ -105,4 +105,25 @@ Content-Type: application/json
 4. **Entity Recognition** (optional) — pre-identify entities
 5. **Rule Extraction** (Custom Web API Skill) — apply prompt contract
 6. **Embedding** — vectorize chunk content
-7. **Index Projection** — write `Content`, `Vectorized_Content`, `RulesJson` to index
+7. **Version Stamping** — assign `RulesetVersion` and `SourceDocumentVersion` to each rule row
+8. **Index Projection** — write `Content`, `Vectorized_Content`, `RulesJson`, version fields to index
+
+## Document Version Update Pipeline
+
+When a new version of a source document is ingested (e.g., OSFI B-21 Rev 2025 replaces Rev 2024):
+
+### Orchestration Flow
+1. **Detect document identity** — match the incoming document to an existing `SourceDocumentId` (by URI, title, or explicit mapping).
+2. **Assign new version** — increment `SourceDocumentVersion` (e.g., `"2024.1"` → `"2025.1"`) and `RulesetVersion` (e.g., `"v2.1.0"` → `"v3.0.0"`).
+3. **Run the full pipeline** — crack, chunk, extract, normalize, embed, and version-stamp the new document.
+4. **Replace index rows** — delete or overwrite all existing rows for the same `SourceDocumentId` with the new version's rows.
+5. **Archive old version** (optional) — copy old rows to an archive store before deletion for audit.
+6. **Update `RulesetPublishedTimestamp`** — set to the current timestamp on all new rows.
+
+### Versioning Rules
+- `SourceDocumentVersion` is a free-form string assigned by the pipeline operator (e.g., `"2024.1"`, `"B-21 Rev 2025"`).
+- `RulesetVersion` follows [Semantic Versioning](https://semver.org/):
+  - **Major** — document replaced or significant rule changes
+  - **Minor** — new rules added, no existing rules removed
+  - **Patch** — minor corrections or metadata updates
+- The pipeline orchestrator is responsible for version assignment; the AI enrichment skill simply propagates the version it receives.

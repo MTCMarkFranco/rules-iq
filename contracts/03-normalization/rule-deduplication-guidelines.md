@@ -41,6 +41,14 @@ Use these guidelines when consolidating candidate rules from multiple chunks or 
 - Every normalized rule MUST include `Metadata.SourceDocuments` listing all chunks that contributed to it.
 - Never discard metadata during merging.
 - If a rule was derived from 5 chunks, all 5 must appear in `SourceDocuments`.
+- Every `SourceDocuments` entry MUST preserve `SourceDocumentVersion` if it was present in the candidate rule.
+
+## Version-Aware Deduplication
+When deduplicating rules across different versions of the same source document:
+- Rules from the **newer** `SourceDocumentVersion` take precedence over the older version.
+- If a rule exists in both versions with identical expressions, merge and keep the newer version's metadata.
+- If a rule was removed in the newer version (not present), do NOT carry it forward.
+- Document all version-based deduplication decisions in `NormalizationNotes`.
 
 ## Conflict Documentation
 When documenting conflicts in `NormalizationNotes`, include:

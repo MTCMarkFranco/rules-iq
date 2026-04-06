@@ -1,0 +1,83 @@
+{
+  "EvaluationId": "eval-2025-03-16-001",
+  "WorkflowName": "CanadianLoanEligibility",
+  "EvaluationGoal": "Determine loan eligibility for personal loan application",
+  "VersionFingerprint": {
+    "RulesetVersion": "v1.0.0",
+    "RulesetPublishedTimestamp": "2025-03-15T10:30:00Z",
+    "SourceDocumentVersions": [
+      {
+        "SourceDocumentId": "policy-doc-2024-001",
+        "SourceDocumentVersion": "2024.1",
+        "IngestedTimestamp": "2025-03-14T08:00:00Z"
+      }
+    ],
+    "EvaluationTimestamp": "2025-03-16T14:22:00Z"
+  },
+  "ComplianceScore": {
+    "TotalRulesEvaluated": 7,
+    "RulesPassed": 5,
+    "RulesFailed": 2,
+    "CompliancePercentage": 71.43,
+    "FailedRules": [
+      {
+        "RuleName": "MaxGrossDebtServiceRatio",
+        "Expression": "input.GDS <= 39",
+        "ErrorMessage": "Applicant GDS ratio must not exceed 39%"
+      },
+      {
+        "RuleName": "MinimumCreditScore",
+        "Expression": "input.CreditScore >= 650",
+        "ErrorMessage": "Applicant credit score must be at least 650"
+      }
+    ]
+  },
+  "RulesSnapshot": {
+    "WorkflowName": "CanadianLoanEligibility",
+    "RulesetVersion": "v1.0.0",
+    "Rules": [
+      {
+        "RuleName": "MinimumAgeRequirement",
+        "Expression": "input.Age >= 18",
+        "Result": "Passed",
+        "SuccessEvent": "Applicant meets minimum age requirement"
+      },
+      {
+        "RuleName": "ResidencyRequirement",
+        "Expression": "input.ResidencyStatus == \"Citizen\" || input.ResidencyStatus == \"PermanentResident\" || (input.ResidencyStatus == \"WorkPermit\" && input.WorkPermitRemainingMonths >= 12)",
+        "Result": "Passed",
+        "SuccessEvent": "Applicant meets residency requirement"
+      },
+      {
+        "RuleName": "MinimumIncomeRequirement",
+        "Expression": "input.AnnualIncome >= 25000",
+        "Result": "Passed",
+        "SuccessEvent": "Applicant meets minimum income requirement"
+      },
+      {
+        "RuleName": "MaxGrossDebtServiceRatio",
+        "Expression": "input.GDS <= 39",
+        "Result": "Failed",
+        "ErrorMessage": "Applicant GDS ratio must not exceed 39%"
+      },
+      {
+        "RuleName": "MaxTotalDebtServiceRatio",
+        "Expression": "input.TDS <= 44",
+        "Result": "Passed",
+        "SuccessEvent": "TDS ratio within acceptable limit"
+      },
+      {
+        "RuleName": "MinimumCreditScore",
+        "Expression": "input.CreditScore >= 650",
+        "Result": "Failed",
+        "ErrorMessage": "Applicant credit score must be at least 650"
+      },
+      {
+        "RuleName": "MinimumEmploymentDuration",
+        "Expression": "input.EmploymentDurationMonths >= 6",
+        "Result": "Passed",
+        "SuccessEvent": "Applicant meets minimum employment duration"
+      }
+    ]
+  }
+}

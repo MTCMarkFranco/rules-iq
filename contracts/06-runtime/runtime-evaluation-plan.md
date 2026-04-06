@@ -1,5 +1,20 @@
 # Prompt Contract: Apply RulesEngine Rules to New Document Chunk (Deterministic Evaluation Plan)
 
+## Core Tenets
+
+### Rules Engine Foundation
+The rules engine MUST be based on the **Microsoft RulesEngine** NuGet package (or a fork of the repository if modifications are required):
+- **NuGet:** https://www.nuget.org/packages/RulesEngine/
+- **Repository:** https://github.com/microsoft/RulesEngine
+- All workflow and rule JSON MUST conform to the [RulesEngine workflow schema](https://github.com/microsoft/RulesEngine/blob/main/schema/workflow-schema.json).
+- If the NuGet package is insufficient (e.g., custom expression types, extended metadata), fork the repository and maintain changes in a separate branch. Document all deviations.
+
+### Version Fingerprinting
+Every evaluation result MUST be fingerprinted with the version of the ruleset used at the time of execution. This ensures auditability and point-in-time reproducibility.
+
+### Compliance Scoring
+Every evaluation MUST produce a compliance score representing the percentage of rules that passed out of the total rules evaluated.
+
 ## Inputs
 - **Context:**
   - At runtime, application code will:
@@ -69,6 +84,51 @@
         "Notes": "Circuit breaker for Azure AI Search queries — open after 5 consecutive failures."
       }
     ]
+  },
+  "VersionFingerprint": {
+    "RulesetVersion": "v2.1.0",
+    "RulesetPublishedTimestamp": "2025-03-15T10:30:00Z",
+    "SourceDocumentVersions": [
+      {
+        "SourceDocumentId": "policy-doc-2024-001",
+        "DocumentVersion": "2024.1",
+        "IngestedTimestamp": "2025-03-14T08:00:00Z"
+      }
+    ],
+    "EvaluationTimestamp": "2025-03-16T14:22:00Z"
+  },
+  "ComplianceScore": {
+    "TotalRulesEvaluated": 7,
+    "RulesPassed": 5,
+    "RulesFailed": 2,
+    "CompliancePercentage": 71.43,
+    "FailedRules": [
+      {
+        "RuleName": "MaxGrossDebtServiceRatio",
+        "ErrorMessage": "Applicant GDS ratio must not exceed 39%"
+      },
+      {
+        "RuleName": "MinimumCreditScore",
+        "ErrorMessage": "Applicant credit score must be at least 650"
+      }
+    ]
+  },
+  "RulesSnapshot": {
+    "Description": "Complete snapshot of all rules used in this evaluation for audit trail",
+    "WorkflowName": "EligibilityRules",
+    "RulesetVersion": "v2.1.0",
+    "Rules": [
+      {
+        "RuleName": "MinimumAgeRequirement",
+        "Expression": "input.Age >= 18",
+        "Result": "Passed"
+      },
+      {
+        "RuleName": "MaxGrossDebtServiceRatio",
+        "Expression": "input.GDS <= 39",
+        "Result": "Failed"
+      }
+    ]
   }
 }
 ```
@@ -82,6 +142,20 @@
 - **`ResiliencePlan`**:
   - Where resilience patterns (e.g., Polly) should be applied.
   - Resilience applies to **external data lookups**, not to rule evaluation itself (rule evaluation is deterministic and does not need retry).
+- **`VersionFingerprint`**:
+  - Records the exact ruleset version, source document versions, and timestamps used for this evaluation.
+  - `RulesetVersion`: the semantic version of the ruleset at evaluation time.
+  - `SourceDocumentVersions`: array listing each source document and when it was ingested.
+  - `EvaluationTimestamp`: when the evaluation was executed.
+- **`ComplianceScore`**:
+  - `TotalRulesEvaluated`: total number of rules executed.
+  - `RulesPassed` / `RulesFailed`: counts of passed and failed rules.
+  - `CompliancePercentage`: `(RulesPassed / TotalRulesEvaluated) * 100`, rounded to 2 decimal places.
+  - `FailedRules`: array of failed rule names and their error messages for quick review.
+- **`RulesSnapshot`**:
+  - A complete record of every rule (name, expression, result) used in this evaluation.
+  - This is the **audit fingerprint** — it allows point-in-time reconstruction of exactly which rules were applied and what version they were.
+  - The UI and downstream consumers use this to display the full rule context alongside results.
 
 ## Constraints
 - **No actual execution:**
@@ -109,3 +183,7 @@
 - [ ] The plan suggests where resilience patterns are appropriate without over-engineering.
 - [ ] Missing input fields are identified and documented with resolution strategies.
 - [ ] No rule outcomes are predicted or simulated — only the plan is described.
+- [ ] The output includes a `VersionFingerprint` with the ruleset version, source document versions, and evaluation timestamp.
+- [ ] The output includes a `ComplianceScore` with total, passed, failed counts and a percentage.
+- [ ] The output includes a `RulesSnapshot` containing every rule used and its result, stamped with the ruleset version.
+- [ ] The JSON output is structured for UI consumption — the AI agent produces this as the primary output format.

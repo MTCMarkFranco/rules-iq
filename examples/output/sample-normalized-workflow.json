@@ -1,5 +1,8 @@
 {
   "WorkflowName": "CanadianLoanEligibility",
+  "RulesetVersion": "v1.0.0",
+  "SourceDocumentVersion": "2024.1",
+  "RulesetPublishedTimestamp": "2025-03-15T10:30:00Z",
   "Rules": [
     {
       "RuleName": "MinimumAgeRequirement",
@@ -14,6 +17,7 @@
           {
             "SourceDocumentId": "policy-doc-2024-001",
             "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "SourceDocumentVersion": "2024.1",
             "PageNumber": 3,
             "CharRange": { "Start": 1024, "End": 1200 }
           }
@@ -33,6 +37,7 @@
           {
             "SourceDocumentId": "policy-doc-2024-001",
             "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "SourceDocumentVersion": "2024.1",
             "PageNumber": 3,
             "CharRange": { "Start": 1024, "End": 1200 }
           }
@@ -52,6 +57,7 @@
           {
             "SourceDocumentId": "policy-doc-2024-001",
             "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "SourceDocumentVersion": "2024.1",
             "PageNumber": 3,
             "CharRange": { "Start": 1200, "End": 1400 }
           }
@@ -71,6 +77,7 @@
           {
             "SourceDocumentId": "policy-doc-2024-001",
             "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "SourceDocumentVersion": "2024.1",
             "PageNumber": 3,
             "CharRange": { "Start": 1400, "End": 1550 }
           }
@@ -90,6 +97,7 @@
           {
             "SourceDocumentId": "policy-doc-2024-001",
             "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "SourceDocumentVersion": "2024.1",
             "PageNumber": 3,
             "CharRange": { "Start": 1550, "End": 1650 }
           }
@@ -109,6 +117,7 @@
           {
             "SourceDocumentId": "policy-doc-2024-001",
             "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "SourceDocumentVersion": "2024.1",
             "PageNumber": 3,
             "CharRange": { "Start": 1650, "End": 1750 }
           }
@@ -128,6 +137,7 @@
           {
             "SourceDocumentId": "policy-doc-2024-001",
             "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "SourceDocumentVersion": "2024.1",
             "PageNumber": 3,
             "CharRange": { "Start": 1750, "End": 1850 }
           }
@@ -147,6 +157,7 @@
           {
             "SourceDocumentId": "policy-doc-2024-001",
             "SourceUri": "https://contoso.com/policies/personal-loan-eligibility-2024.pdf",
+            "SourceDocumentVersion": "2024.1",
             "PageNumber": 3,
             "CharRange": { "Start": 1850, "End": 2000 }
           }

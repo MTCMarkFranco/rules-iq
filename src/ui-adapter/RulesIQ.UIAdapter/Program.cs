@@ -12,6 +12,7 @@ builder.Services.AddScoped<IRuleEvaluationService, RuleEvaluationService>();
 builder.Services.AddScoped<IAgentEvaluationService, AgentEvaluationService>();
 builder.Services.AddScoped<IRuleRetrievalService, RuleRetrievalService>();
 builder.Services.AddScoped<ITraceabilityService, TraceabilityService>();
+builder.Services.AddScoped<IRuleManagementService, RuleManagementService>();
 
 var app = builder.Build();
 

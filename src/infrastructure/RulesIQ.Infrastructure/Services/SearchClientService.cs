@@ -14,6 +14,8 @@ public interface ISearchClientService
     Task<List<SearchDocument>> SearchRulesAsync(string workflowName, CancellationToken cancellationToken = default);
     Task<List<SearchDocument>> SearchAllRulesAsync(CancellationToken cancellationToken = default);
     Task<List<SearchDocument>> SearchRulesByDocumentAsync(string documentId, CancellationToken cancellationToken = default);
+    Task<List<SearchDocument>> SearchAllDocumentsForManagementAsync(CancellationToken cancellationToken = default);
+    Task MergeDocumentAsync(IDictionary<string, object> fields, CancellationToken cancellationToken = default);
 }
 
 public sealed class SearchClientService : ISearchClientService
@@ -91,5 +93,35 @@ public sealed class SearchClientService : ISearchClientService
         }
 
         return results;
+    }
+
+    public async Task<List<SearchDocument>> SearchAllDocumentsForManagementAsync(CancellationToken cancellationToken = default)
+    {
+        _logger.LogInformation("Searching all documents with rules for management");
+        var searchOptions = new SearchOptions
+        {
+            Filter = "HasRules eq true",
+            Select = { "id", "Content", "RulesJson", "SourceUri", "SourceDocumentId", "WorkflowName",
+                       "RulesetVersion", "SourceDocumentVersion", "PageNumber", "SemanticLabel",
+                       "IndexedTimestamp", "RulesetPublishedTimestamp", "RuleCount" },
+            Size = 1000
+        };
+
+        var results = new List<SearchDocument>();
+        var response = await _searchClient.SearchAsync<SearchDocument>("*", searchOptions, cancellationToken);
+        await foreach (var result in response.Value.GetResultsAsync())
+        {
+            results.Add(result.Document);
+        }
+
+        _logger.LogInformation("Found {Count} documents with rules for management", results.Count);
+        return results;
+    }
+
+    public async Task MergeDocumentAsync(IDictionary<string, object> fields, CancellationToken cancellationToken = default)
+    {
+        var doc = new SearchDocument(fields);
+        var result = await _searchClient.MergeDocumentsAsync(new[] { doc }, cancellationToken: cancellationToken);
+        _logger.LogInformation("Merged document {Id} in search index", fields.TryGetValue("id", out var id) ? id : "unknown");
     }
 }

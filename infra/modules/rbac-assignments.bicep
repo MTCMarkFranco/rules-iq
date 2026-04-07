@@ -67,6 +67,17 @@ resource appToSearch 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   }
 }
 
+// #4b: App Service → AI Search (write rules back for management UI)
+resource appToSearchWrite 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
+  name: guid('app-service-write', searchService.id, searchIndexDataContributor)
+  scope: searchService
+  properties: {
+    roleDefinitionId: subscriptionResourceId('Microsoft.Authorization/roleDefinitions', searchIndexDataContributor)
+    principalId: appServicePrincipalId
+    principalType: 'ServicePrincipal'
+  }
+}
+
 // #5: Managed Identity → OpenAI (AI Foundry agents)
 resource identityToOpenAI 'Microsoft.Authorization/roleAssignments@2022-04-01' = {
   name: guid('id-rulesiq', openAIAccount.id, cognitiveServicesOpenAIUser)

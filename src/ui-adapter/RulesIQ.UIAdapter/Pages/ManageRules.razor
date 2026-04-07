@@ -1,0 +1,438 @@
+@page "/manage-rules"
+@using RulesIQ.UIAdapter.Services
+@inject IRuleManagementService ManagementService
+
+<PageTitle>Rules Management</PageTitle>
+
+<h2>Rules Management</h2>
+<p>Edit rules directly in the search index. Changes are written back to the index on save.</p>
+
+@if (_statusMessage is not null)
+{
+    <div class="alert @(_statusIsError ? "alert-danger" : "alert-success") alert-dismissible fade show" role="alert">
+        @_statusMessage
+        <button type="button" class="btn-close" @onclick="ClearStatus"></button>
+    </div>
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        @if (!_loading && _documents.Count > 0)
+        {
+            <span class="text-muted">
+                @_documents.Count document(s) &middot; @_documents.Sum(d => d.Rules.Count) total rules
+                @{ var dirtyCount = _documents.Count(d => d.IsDirty); }
+                @if (dirtyCount > 0)
+                {
+                    <span class="badge bg-warning ms-2">@dirtyCount unsaved</span>
+                }
+            </span>
+        }
+    </div>
+    <div>
+        @if (_documents.Any(d => d.IsDirty))
+        {
+            <button class="btn btn-primary btn-sm me-2" @onclick="SaveAllChanges" disabled="@_saving">
+                @(_saving ? "Saving..." : "Save All Changes")
+            </button>
+        }
+        <button class="btn btn-outline-secondary btn-sm" @onclick="Reload" disabled="@_loading">
+            @(_loading ? "Loading..." : "Refresh")
+        </button>
+    </div>
+</div>
+
+@if (!string.IsNullOrEmpty(_filterText) || _documents.Count > 3)
+{
+    <div class="mb-3">
+        <input type="text" class="form-control" placeholder="Filter by source document, workflow, or semantic label..."
+               value="@_filterText"
+               @oninput="e => _filterText = e.Value?.ToString() ?? string.Empty" />
+    </div>
+}
+
+@if (_loading)
+{
+    <div class="d-flex align-items-center">
+        <div class="spinner-border spinner-border-sm me-2" role="status"></div>
+        <span>Loading rules from the search index...</span>
+    </div>
+}
+else if (_error is not null)
+{
+    <div class="alert alert-danger">@_error</div>
+}
+else if (_documents.Count == 0)
+{
+    <div class="alert alert-warning">No documents with rules found in the search index.</div>
+}
+else
+{
+    <div class="accordion" id="rulesAccordion">
+        @foreach (var doc in FilteredDocuments)
+        {
+            var docId = doc.Id;
+            var isExpanded = _expandedDocuments.Contains(docId);
+
+            <div class="accordion-item">
+                <h2 class="accordion-header">
+                    <button class="accordion-button @(isExpanded ? "" : "collapsed")" type="button"
+                            @onclick="() => ToggleDocument(docId)">
+                        <div class="d-flex w-100 justify-content-between align-items-center pe-3">
+                            <div>
+                                <strong>@(doc.SourceDocumentId)</strong>
+                                @if (doc.PageNumber.HasValue)
+                                {
+                                    <span class="text-muted ms-1">— Page @doc.PageNumber</span>
+                                }
+                                <span class="badge bg-info ms-2">@doc.Rules.Count rule(s)</span>
+                                @if (doc.IsDirty)
+                                {
+                                    <span class="badge bg-warning ms-1">Modified</span>
+                                }
+                            </div>
+                            <small class="text-muted">
+                                @doc.WorkflowName
+                                @if (!string.IsNullOrEmpty(doc.RulesetVersion))
+                                {
+                                    <span class="ms-1">v@(doc.RulesetVersion)</span>
+                                }
+                            </small>
+                        </div>
+                    </button>
+                </h2>
+                <div class="accordion-collapse collapse @(isExpanded ? "show" : "")">
+                    <div class="accordion-body">
+
+                        @* Source Document Link *@
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Source Document</label>
+                            <div>
+                                @if (!string.IsNullOrEmpty(doc.SourceUri))
+                                {
+                                    <a href="@doc.SourceUri" target="_blank" rel="noopener noreferrer"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <span class="oi oi-external-link me-1"></span>
+                                        Open @GetDocumentFileName(doc.SourceUri)
+                                    </a>
+                                }
+                                else
+                                {
+                                    <span class="text-muted">No source document link available</span>
+                                }
+                            </div>
+                            @if (!string.IsNullOrEmpty(doc.SemanticLabel))
+                            {
+                                <small class="text-muted d-block mt-1">@doc.SemanticLabel</small>
+                            }
+                        </div>
+
+                        @* Chunk Content *@
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">Chunk Content</label>
+                            <textarea class="form-control" rows="6" readonly>@doc.Content</textarea>
+                        </div>
+
+                        @* Rules Section *@
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label class="form-label fw-bold mb-0">Rules (@doc.Rules.Count)</label>
+                                <div>
+                                    <button class="btn btn-sm btn-outline-success" @onclick="() => AddRule(doc)">
+                                        + Add Rule
+                                    </button>
+                                    @if (doc.IsDirty)
+                                    {
+                                        <button class="btn btn-sm btn-primary ms-1" @onclick="() => SaveDocument(doc)" disabled="@_saving">
+                                            Save
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary ms-1" @onclick="() => DiscardChanges(doc)">
+                                            Discard
+                                        </button>
+                                    }
+                                </div>
+                            </div>
+
+                            @for (var i = 0; i < doc.Rules.Count; i++)
+                            {
+                                var rule = doc.Rules[i];
+                                var ruleIndex = i;
+
+                                <div class="card mb-2">
+                                    <div class="card-body py-2 px-3">
+                                        <div class="d-flex justify-content-between align-items-start mb-2">
+                                            <span class="badge bg-secondary">Rule @(ruleIndex + 1)</span>
+                                            <button class="btn btn-sm btn-outline-danger"
+                                                    @onclick="() => RemoveRule(doc, ruleIndex)"
+                                                    title="Remove this rule">
+                                                &times;
+                                            </button>
+                                        </div>
+
+                                        <div class="row mb-2">
+                                            <div class="col-md-6">
+                                                <label class="form-label small">Rule Name</label>
+                                                <input type="text" class="form-control form-control-sm"
+                                                       value="@rule.RuleName"
+                                                       @oninput="e => { rule.RuleName = e.Value?.ToString() ?? string.Empty; doc.IsDirty = true; }" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small">Expression Type</label>
+                                                <select class="form-select form-select-sm"
+                                                        value="@rule.RuleExpressionType"
+                                                        @onchange="e => OnExpressionTypeChanged(e, rule, doc)">
+                                                    <option value="LambdaExpression">Lambda Expression</option>
+                                                </select>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-2">
+                                            <label class="form-label small">Expression</label>
+                                            <textarea class="form-control form-control-sm font-monospace" rows="2"
+                                                      @oninput="e => { rule.Expression = e.Value?.ToString() ?? string.Empty; doc.IsDirty = true; }">@rule.Expression</textarea>
+                                        </div>
+
+                                        <div class="row mb-2">
+                                            <div class="col-md-6">
+                                                <label class="form-label small">Success Event</label>
+                                                <input type="text" class="form-control form-control-sm"
+                                                       value="@rule.SuccessEvent"
+                                                       @oninput="e => { rule.SuccessEvent = e.Value?.ToString() ?? string.Empty; doc.IsDirty = true; }" />
+                                            </div>
+                                            <div class="col-md-6">
+                                                <label class="form-label small">Error Message</label>
+                                                <input type="text" class="form-control form-control-sm"
+                                                       value="@rule.ErrorMessage"
+                                                       @oninput="e => { rule.ErrorMessage = e.Value?.ToString() ?? string.Empty; doc.IsDirty = true; }" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            }
+                        </div>
+
+                        @* Metadata footer *@
+                        <div class="border-top pt-2">
+                            <small class="text-muted">
+                                <strong>Document ID:</strong> @doc.Id |
+                                <strong>Indexed:</strong> @(doc.IndexedTimestamp?.ToString("yyyy-MM-dd HH:mm") ?? "N/A") |
+                                <strong>Source Version:</strong> @(doc.SourceDocumentVersion ?? "N/A")
+                            </small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private List<ManagedDocument> _documents = [];
+    private Dictionary<string, List<ManagedRule>> _snapshots = new();
+    private HashSet<string> _expandedDocuments = new();
+    private string? _error;
+    private string? _statusMessage;
+    private bool _statusIsError;
+    private bool _loading = true;
+    private bool _saving;
+    private string _filterText = string.Empty;
+
+    private IEnumerable<ManagedDocument> FilteredDocuments =>
+        string.IsNullOrWhiteSpace(_filterText)
+            ? _documents
+            : _documents.Where(d =>
+                d.SourceDocumentId.Contains(_filterText, StringComparison.OrdinalIgnoreCase) ||
+                d.WorkflowName.Contains(_filterText, StringComparison.OrdinalIgnoreCase) ||
+                (d.SemanticLabel?.Contains(_filterText, StringComparison.OrdinalIgnoreCase) ?? false) ||
+                d.Rules.Any(r => r.RuleName.Contains(_filterText, StringComparison.OrdinalIgnoreCase)));
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadDocuments();
+    }
+
+    private async Task LoadDocuments()
+    {
+        _loading = true;
+        _error = null;
+        try
+        {
+            _documents = await ManagementService.LoadAllRuleDocumentsAsync();
+            TakeSnapshots();
+        }
+        catch (Exception ex)
+        {
+            _error = $"Failed to load rules: {ex.Message}";
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private void TakeSnapshots()
+    {
+        _snapshots.Clear();
+        foreach (var doc in _documents)
+        {
+            _snapshots[doc.Id] = doc.Rules.Select(CloneRule).ToList();
+        }
+    }
+
+    private static ManagedRule CloneRule(ManagedRule r) => new()
+    {
+        RuleName = r.RuleName,
+        Expression = r.Expression,
+        SuccessEvent = r.SuccessEvent,
+        ErrorMessage = r.ErrorMessage,
+        RuleExpressionType = r.RuleExpressionType,
+        OriginalMetadata = new RuleMetadata
+        {
+            SourceDocumentId = r.OriginalMetadata.SourceDocumentId,
+            SourceUri = r.OriginalMetadata.SourceUri,
+            SourceDocumentVersion = r.OriginalMetadata.SourceDocumentVersion,
+            PageNumber = r.OriginalMetadata.PageNumber,
+            CharRange = r.OriginalMetadata.CharRange
+        }
+    };
+
+    private void ToggleDocument(string id)
+    {
+        if (!_expandedDocuments.Remove(id))
+            _expandedDocuments.Add(id);
+    }
+
+    private void AddRule(ManagedDocument doc)
+    {
+        doc.Rules.Add(new ManagedRule
+        {
+            RuleName = $"NewRule{doc.Rules.Count + 1}",
+            Expression = "true",
+            SuccessEvent = "Rule passed",
+            ErrorMessage = "Rule failed",
+            OriginalMetadata = new RuleMetadata
+            {
+                SourceDocumentId = doc.SourceDocumentId,
+                SourceUri = doc.SourceUri,
+                SourceDocumentVersion = doc.SourceDocumentVersion,
+                PageNumber = doc.PageNumber
+            }
+        });
+        doc.IsDirty = true;
+    }
+
+    private void RemoveRule(ManagedDocument doc, int ruleIndex)
+    {
+        if (ruleIndex >= 0 && ruleIndex < doc.Rules.Count)
+        {
+            doc.Rules.RemoveAt(ruleIndex);
+            doc.IsDirty = true;
+        }
+    }
+
+    private void DiscardChanges(ManagedDocument doc)
+    {
+        if (_snapshots.TryGetValue(doc.Id, out var originalRules))
+        {
+            doc.Rules = originalRules.Select(CloneRule).ToList();
+            doc.IsDirty = false;
+        }
+    }
+
+    private async Task SaveDocument(ManagedDocument doc)
+    {
+        _saving = true;
+        _statusMessage = null;
+        try
+        {
+            await ManagementService.SaveDocumentAsync(doc);
+            doc.IsDirty = false;
+            _snapshots[doc.Id] = doc.Rules.Select(CloneRule).ToList();
+            _statusMessage = $"Saved {doc.Rules.Count} rule(s) for {doc.SourceDocumentId} (Page {doc.PageNumber}).";
+            _statusIsError = false;
+        }
+        catch (Exception ex)
+        {
+            _statusMessage = $"Failed to save {doc.SourceDocumentId}: {ex.Message}";
+            _statusIsError = true;
+        }
+        finally
+        {
+            _saving = false;
+        }
+    }
+
+    private async Task SaveAllChanges()
+    {
+        _saving = true;
+        _statusMessage = null;
+        var dirtyDocs = _documents.Where(d => d.IsDirty).ToList();
+        var savedCount = 0;
+        var errors = new List<string>();
+
+        foreach (var doc in dirtyDocs)
+        {
+            try
+            {
+                await ManagementService.SaveDocumentAsync(doc);
+                doc.IsDirty = false;
+                _snapshots[doc.Id] = doc.Rules.Select(CloneRule).ToList();
+                savedCount++;
+            }
+            catch (Exception ex)
+            {
+                errors.Add($"{doc.SourceDocumentId}: {ex.Message}");
+            }
+        }
+
+        if (errors.Count == 0)
+        {
+            _statusMessage = $"Successfully saved {savedCount} document(s).";
+            _statusIsError = false;
+        }
+        else
+        {
+            _statusMessage = $"Saved {savedCount}, failed {errors.Count}: {string.Join("; ", errors)}";
+            _statusIsError = true;
+        }
+
+        _saving = false;
+    }
+
+    private async Task Reload()
+    {
+        var hasDirty = _documents.Any(d => d.IsDirty);
+        _expandedDocuments.Clear();
+        _filterText = string.Empty;
+        _statusMessage = null;
+        await LoadDocuments();
+        if (!hasDirty)
+        {
+            _statusMessage = "Refreshed from index.";
+            _statusIsError = false;
+        }
+    }
+
+    private void ClearStatus() => _statusMessage = null;
+
+    private void OnExpressionTypeChanged(ChangeEventArgs e, ManagedRule rule, ManagedDocument doc)
+    {
+        rule.RuleExpressionType = e.Value?.ToString() ?? "LambdaExpression";
+        doc.IsDirty = true;
+    }
+
+    private static string GetDocumentFileName(string uri)
+    {
+        if (string.IsNullOrEmpty(uri)) return "Document";
+        try
+        {
+            var path = new Uri(uri).AbsolutePath;
+            var fileName = path.Split('/').LastOrDefault(s => !string.IsNullOrEmpty(s)) ?? "Document";
+            return Uri.UnescapeDataString(fileName);
+        }
+        catch
+        {
+            return "Document";
+        }
+    }
+}

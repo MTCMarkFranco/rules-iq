@@ -2,6 +2,7 @@
 @using RulesIQ.RuntimeEngine.Services
 @using RulesIQ.UIAdapter.Services
 @inject IRuleEvaluationService EvaluationService
+@inject IAgentEvaluationService AgentEvaluationService
 @inject IRuleRetrievalService RetrievalService
 @inject ITraceabilityService TraceabilityService
 
@@ -97,6 +98,9 @@
                         <button type="submit" class="btn btn-primary" disabled="@_evaluating">
                             @(_evaluating ? "Evaluating..." : "Evaluate Compliance")
                         </button>
+                        <button type="button" class="btn btn-success ms-2" disabled="@_evaluating" @onclick="RunAgentEvaluation">
+                            @(_evaluating ? "Evaluating..." : "\U0001f916 Agent Evaluate")
+                        </button>
                         <button type="button" class="btn btn-outline-secondary ms-2" @onclick="LoadCanonicalPersona">
                             Load Test Persona
                         </button>
@@ -151,6 +155,35 @@
         catch (Exception ex)
         {
             _error = $"Evaluation failed: {ex.Message}";
+        }
+        finally
+        {
+            _evaluating = false;
+        }
+    }
+
+    private async Task RunAgentEvaluation()
+    {
+        _evaluating = true;
+        _result = null;
+        _error = null;
+
+        try
+        {
+            var workflow = await RetrievalService.RetrieveAllRulesAsync();
+
+            if (workflow.Rules.Count == 0)
+            {
+                _error = "No rules found in the search index. Ensure the indexer has run.";
+                return;
+            }
+
+            _result = await AgentEvaluationService.EvaluateWithAgentAsync(
+                workflow, _input, "Determine loan eligibility for personal loan application");
+        }
+        catch (Exception ex)
+        {
+            _error = $"Agent evaluation failed: {ex.Message}";
         }
         finally
         {

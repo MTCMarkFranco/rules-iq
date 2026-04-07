@@ -54,6 +54,19 @@ Each rule in the UI should display:
 - Display the **Ruleset Version** (e.g., `v2.1.0`) prominently at the workflow level.
 - Show the **Ruleset Published Timestamp** so users know when the rules were last updated.
 
+## Evaluation Modes
+The Evaluate page provides two evaluation buttons:
+1. **Evaluate Compliance** — Runs rules deterministically via Microsoft RulesEngine against the raw `LoanEligibilityInput`. Fast but requires exact property name matches — rules referencing AI-extracted field names (e.g., `CreditBureauScore`) will fail.
+2. **🤖 Agent Evaluate** — Uses a mapping-based approach: maps rule field names to persona fields via `rule-field-mapping.json` (embedded resource), calls LLM only for unknown fields, then runs the same deterministic RulesEngine with a mapped `ExpandoObject`. The LLM's only job is field mapping — all evaluation is codified. This is the recommended mode when rules reference diverse property names extracted from policy PDFs.
+
+### Result States
+Rule cards support three visual states:
+- **Passed** (green border, ✅ badge) — The persona satisfies the rule condition.
+- **Failed** (red border, ❌ badge) — The persona does not satisfy the rule condition, with error message and LLM reasoning.
+- **Indeterminate** (yellow border, ❓ badge) — The persona lacks sufficient data to evaluate the rule.
+
+Passed rule cards show the success event with the agent's reasoning. Failed and Indeterminate cards show the error message with reasoning.
+
 ## Compliance Score Display
 When displaying evaluation results, the UI MUST show:
 

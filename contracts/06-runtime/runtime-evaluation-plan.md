@@ -15,6 +15,22 @@ Every evaluation result MUST be fingerprinted with the version of the ruleset us
 ### Compliance Scoring
 Every evaluation MUST produce a compliance score representing the percentage of rules that passed out of the total rules evaluated.
 
+### Agent Evaluation (v2) — Mapping-Based Approach
+The system supports TWO evaluation modes:
+1. **Deterministic (RulesEngine)** — Executes rules directly via Microsoft RulesEngine against the raw `LoanEligibilityInput` object. Requires exact property name matches between the input model and rule expressions. Fast, deterministic, no AI at runtime.
+2. **Agent (Mapping + Deterministic)** — Uses a two-phase approach:
+   - **Phase 1 — Field Mapping (LLM only for unknown fields):** Extracts all `input.X` field references from rule expressions, maps them to persona fields using a static `rule-field-mapping.json` embedded resource. Only calls Azure OpenAI if unmapped fields are discovered at runtime. The LLM's ONLY job is to produce field mappings — it does NOT evaluate rules.
+   - **Phase 2 — Deterministic Evaluation:** Builds an `ExpandoObject` with all 186+ field names mapped to actual persona values (direct mapping, assumed true/false, derived values, or defaults). Delegates to the same `IRuleEvaluationService` (Microsoft RulesEngine) for deterministic evaluation.
+
+The `rule-field-mapping.json` contains:
+- `fieldMappings`: Rule field → persona field name (e.g., `CreditBureauScore` → `CreditScore`)
+- `assumedTrueFields`: Institutional/process fields assumed true (e.g., `BoardReviewedAndApprovedFrameworkAndUnderwritingPolicyAnnually`)
+- `assumedFalseFields`: Negative condition fields assumed false (e.g., `IsIllicitPurposeSuspected`)
+- `derivedFields`: Fields computed from persona values (e.g., `IsSelfEmployed` derived from `EmploymentStatus != "Employed"`)
+- `defaultNumericValues` / `defaultStringValues`: Sensible defaults for non-persona fields
+
+Key design principle: **The LLM maps fields, the code evaluates rules.** This avoids token limits, ensures deterministic outcomes, and makes evaluation auditable.
+
 ## Inputs
 - **Context:**
   - At runtime, application code will:

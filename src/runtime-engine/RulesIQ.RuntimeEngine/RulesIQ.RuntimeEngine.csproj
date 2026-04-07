@@ -10,6 +10,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <EmbeddedResource Include="rule-field-mapping.json" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\shared-models\RulesIQ.SharedModels\RulesIQ.SharedModels.csproj" />
     <ProjectReference Include="..\..\infrastructure\RulesIQ.Infrastructure\RulesIQ.Infrastructure.csproj" />
   </ItemGroup>

@@ -1,0 +1,298 @@
+{
+  "description": "Maps rule expression field names (input.X) to LoanEligibilityInput persona fields. Used by AgentEvaluationService to build a dynamic input object for deterministic RulesEngine evaluation.",
+  "fieldMappings": {
+    "Age": "Age",
+    "BorrowerAge": "Age",
+    "Province": "Province",
+    "ResidencyStatus": "ResidencyStatus",
+    "AnnualIncome": "AnnualIncome",
+    "AnnualGrossIncome": "AnnualIncome",
+    "GDS": "GDS",
+    "GrossDebtServiceRatio": "GDS",
+    "TDS": "TDS",
+    "TotalDebtServiceRatio": "TDS",
+    "CreditScore": "CreditScore",
+    "CreditBureauScore": "CreditScore",
+    "MinimumCreditBureauScore": "CreditScore",
+    "EmploymentStatus": "EmploymentStatus",
+    "EmploymentDurationMonths": "EmploymentDurationMonths",
+    "EmploymentDuration": "EmploymentDurationMonths",
+    "LoanAmount": "LoanAmount",
+    "PropertyValue": "PropertyValue",
+    "PropertyAppraiserValue": "PropertyValue",
+    "DownPaymentPercent": "DownPaymentPercent",
+    "DownPaymentPercentage": "DownPaymentPercent",
+    "LTV": "LTV",
+    "LTVRatio": "LTV",
+    "CombinedLTV": "LTV",
+    "HELOC_LTV": "LTV",
+    "HELOC_Authorized_LTV_Ratio": "LTV",
+    "LoanType": "LoanType",
+    "LenderType": "LenderType"
+  },
+  "assumedTrueFields": [
+    "AccurateAndCompleteRecordsOfPolicyImplementationMaintained",
+    "AccurateRecordsOfContactedConsumersMaintained",
+    "AccurateRecordsOfMortgageReliefMeasuresImplemented",
+    "AdheringToMaximumLTVRatioLimit",
+    "AllConditionsMetAndDocumentationObtained",
+    "AppraiserIsDesignated",
+    "AppraiserIsDesignatedLicensedOrCertified",
+    "AppraiserIsIndependentFromLoanProcess",
+    "AppraiserIsIndependentFromMortgageProcess",
+    "AppraiserIsLicensedOrCertified",
+    "AppraiserMeetsQualificationStandards",
+    "AutomatedValuationToolControlsInPlace",
+    "AutomatedValuationToolMonitoringProcessEstablished",
+    "BackTestingProcessesUsed",
+    "BoardMonitorsExceptionsToPoliciesAndControls",
+    "BoardReviewedAndApprovedFrameworkAndUnderwritingPolicyAnnually",
+    "BorrowerBackgroundAssessed",
+    "BorrowerConsentObtained",
+    "BorrowerCreditHistoryAssessed",
+    "BorrowerInfoAndCreditAnalysisDocumented",
+    "BorrowingBehaviourAssessed",
+    "CollateralClaimLegallyEnforceable",
+    "CompliesWithPrivacyLegislation",
+    "ComponentValueKnownAtDisclosure",
+    "ConsumersMonitoredForEarlySignsOfSevereFinancialStress",
+    "ContinuousMonitoringAndAuditing",
+    "ControlsMonitoringAndReportingCompletedAsPerPolicy",
+    "CreditPolicyIsAvailableUponFSRARequest",
+    "CreditPolicyIsClearAndUseful",
+    "CreditPolicyIsDocumented",
+    "CriteriaForMortgageLoansIsConsistentWithApplicableLaws",
+    "DisclosedComponentValue",
+    "DisclosureDescribesComplexCalculationProcess",
+    "DisclosureIncludesBreakdownOfInsuredLoans",
+    "DisclosureIncludesFRFIDefinitionOfInsured",
+    "DisclosureIncludesGeneralCalculationInformation",
+    "DisclosureIncludesGeographicBreakdown",
+    "DisclosureIncludesInsuredVsUninsured",
+    "DisclosureIncludesNumberOfPaymentsRemaining",
+    "DisclosureIncludesOutstandingBalance",
+    "DisclosureIncludesPayment",
+    "DisclosureIncludesPostedRate",
+    "DisclosureIncludesPrepaymentChargeCalculationProcessDescription",
+    "DisclosureIncludesPrepaymentChargeComponentsDescription",
+    "DisclosureIncludesRenewalBalance",
+    "DisclosureIncludesTotalStockOfInsuredLoans",
+    "DisclosureLanguageIsClearAndSimple",
+    "DocumentationIsAccurate",
+    "ExceptionsToCreditPolicyIdentifiedAndReported",
+    "FraudDetectionMechanismsPresent",
+    "FundsDisbursedToSolicitorOrTitleInsurance",
+    "GuarantorCreditAssessmentIsRigorous",
+    "HasDisclosedImpactOnTotalCost",
+    "HasDisclosedOutstandingAmountOwing",
+    "HasIndependentModelValidationProcess",
+    "HasInformedOSFIMaterialMortgageUnderwritingIssues",
+    "HasInformedOSFIOfMaterialUnderwritingIssues",
+    "HasProofOfIncome",
+    "HasRelevantBusinessDocumentation",
+    "HasResidentialMortgageRiskManagementFramework",
+    "HasRMIUPAndManagementReports",
+    "HasRMUPAndManagementReports",
+    "IncomeVerificationIsReliableAndWellDocumented",
+    "IncomeVerificationSourceAddressesDeclaredIncome",
+    "IncomeVerificationSourceIsDifficultToFalsify",
+    "IncomeVerificationSourceIsIndependent",
+    "IncomeVerifiedByIndependentSource",
+    "InsuranceAgreementIsClearComprehensiveUnambiguousAndEnforceable",
+    "LenderDocumentationIsComplete",
+    "LenderDocumentationMaintainedForCoveragePeriod",
+    "LenderHasFraudDetectionMechanisms",
+    "LenderInformationIsAccurate",
+    "LenderInformationIsComplete",
+    "LenderInformationIsTimely",
+    "LenderReportsSuspectedOrVerifiedFraud",
+    "LoanDecisionMadeByAuthorizedEmployee",
+    "LoanPortionOver65PercentIsAmortized",
+    "LoanProcessingFlowIsPreEstablished",
+    "LoanReviewedByOtherThanApprovedLender",
+    "MaximumLTVRatioLimitEstablished",
+    "MeetsInsurerRequirements",
+    "ModelValidationAtInitialImplementation",
+    "ModelValidationPeriodic",
+    "MortgageCreditPolicyRequirementsFollowed",
+    "NoPolicyExceptionsRequireApproval",
+    "OnSiteInspectionPerformed",
+    "PortfolioConcentrationWithinPolicyLimits",
+    "ProperSecurityValuatedAndPledged",
+    "QualifyingInterestRateMeetsGovernmentFramework",
+    "ReferenceToComponentValueLocation",
+    "RegularlyReviewsAndRecalibratesRiskParameters",
+    "RemunerationPoliciesProtectConsumerInterests",
+    "ReportOnGuidelineImplementationProvidedUponRequest",
+    "SeparationOfOriginationAndAdjudicationFunctions",
+    "SoundLoanDocumentationMaintained",
+    "SufficientDetailProvidedForComponent",
+    "ThirdPartyAppraiserUsed",
+    "ThirdPartyStandardsCompliant",
+    "TitleInsuranceFromThirdPartyInPlace",
+    "TollFreeNumberProvided",
+    "UnderwritingExceptionDocumentationMaintained",
+    "ValuationDocumentationIsComprehensive",
+    "VariableRemunerationIncludesCreditQualityMetrics",
+    "VariableRemunerationLinkedToLongTermCreditQuality",
+    "VerificationProvided"
+  ],
+  "assumedFalseFields": [
+    "IncomeVerificationContradictsOtherInformation",
+    "IncomeVerificationInformationContradicts",
+    "IncentiveOrRebatePaymentsIncludedInDownPayment",
+    "IsIllicitPurposeSuspected",
+    "IsPCMLTFACompliant",
+    "ReliedSolelyOnThirdPartyAttestation",
+    "UsesComplexCalculation",
+    "UsesPostedRateInsteadOfContractualRate",
+    "UsesPresentValueCalculation"
+  ],
+  "derivedFields": {
+    "IsSelfEmployed": {
+      "source": "EmploymentStatus",
+      "condition": "notEquals",
+      "value": "Employed"
+    },
+    "IsResidentialMortgageLoan": {
+      "source": "LoanType",
+      "condition": "equals",
+      "value": "Mortgage"
+    },
+    "IsInsuredMortgage": {
+      "source": "LTV",
+      "condition": "greaterThan",
+      "value": "80"
+    },
+    "DownPaymentGifted": {
+      "constant": false
+    },
+    "HasGuarantorOrCoSignor": {
+      "constant": false
+    },
+    "AtMortgageRenewal": {
+      "constant": false
+    },
+    "IsConsumerAtRisk": {
+      "constant": false
+    },
+    "IsAcquiredMortgage": {
+      "constant": false
+    },
+    "Refinancing": {
+      "constant": false
+    },
+    "MortgageReliefMeasuresActivated": {
+      "constant": false
+    },
+    "MortgageReliefMeasuresImplemented": {
+      "constant": false
+    },
+    "MortgageReliefMeasuresResultInNegativeAmortization": {
+      "constant": false
+    },
+    "UsesUnderwritingModels": {
+      "constant": true
+    },
+    "UsesGDSAndTDSRatiosForInsuranceDecision": {
+      "constant": true
+    },
+    "InspectorIsQualifiedEmployee": {
+      "constant": true
+    },
+    "InspectorIsAppraiser": {
+      "constant": true
+    },
+    "CreditScoreStatus": {
+      "source": "CreditScore",
+      "condition": "lessThan",
+      "value": "650",
+      "trueResult": "Low",
+      "falseResult": "Acceptable"
+    },
+    "DebtServiceabilityRatioStatus": {
+      "source": "GDS",
+      "condition": "greaterThan",
+      "value": "39",
+      "trueResult": "High",
+      "falseResult": "Acceptable"
+    },
+    "IncomeVerificationStatus": {
+      "source": "EmploymentStatus",
+      "condition": "equals",
+      "value": "Employed",
+      "trueResult": "Sufficient",
+      "falseResult": "Insufficient"
+    },
+    "PropertyCreditRiskStatus": {
+      "source": "LTV",
+      "condition": "greaterThan",
+      "value": "80",
+      "trueResult": "Elevated",
+      "falseResult": "Normal"
+    },
+    "IncomeVerificationNotContradictedByOtherInformation": {
+      "constant": true
+    },
+    "LenderIsFederallyRegulated": {
+      "source": "LenderType",
+      "condition": "equals",
+      "value": "FederallyRegulated"
+    },
+    "NewMortgagePaymentArrangementAgreed": {
+      "constant": false
+    },
+    "LatePaymentOrDelinquencyIsInAccordanceWithNewArrangement": {
+      "constant": true
+    },
+    "InternalFeesOrCostsWouldOtherwiseBeCharged": {
+      "constant": false
+    },
+    "WithinLimitedPeriod": {
+      "constant": true
+    },
+    "MakesLumpSumPaymentToAvoidNegativeAmortization": {
+      "constant": false
+    },
+    "SellsPrincipalResidence": {
+      "constant": false
+    },
+    "InabilityToAdjustMortgageCreditAgreement": {
+      "constant": false
+    },
+    "InabilityToQualifyWithOtherLenders": {
+      "constant": false
+    }
+  },
+  "defaultNumericValues": {
+    "MinimumDownPaymentAmount": 0,
+    "AmortizationPeriod": 300,
+    "StatedMaximumAmortizationPeriod": 300,
+    "QualifyingRate": 7.0,
+    "ContractualMortgageRate": 5.0,
+    "SuperintendentBuffer": 2.0,
+    "SuperintendentFloorRate": 5.25,
+    "FRFI_LTVLimit": 95.0,
+    "PremiumReviewFrequencyInMonths": 12,
+    "UpdatedLoanBalanceFrequencyInMonths": 1,
+    "DwellingUnits": 1
+  },
+  "defaultStringValues": {
+    "BorrowerType": "individual",
+    "CreditApplicationType": "personal",
+    "LoanPurpose": "residential",
+    "MortgageInsuranceType": "default",
+    "PropertyType": "real property",
+    "PropertyLocation": "Canada",
+    "Purpose": "Purchase",
+    "DisclosureFrequency": "Quarterly",
+    "DisclosureFormat": "Understandable",
+    "DisclosureLocation": "Public"
+  },
+  "insufficientDataFields": [
+    "DownPaymentSources",
+    "Disclosure",
+    "DisclosureLanguage",
+    "RenewalDisclosure"
+  ]
+}

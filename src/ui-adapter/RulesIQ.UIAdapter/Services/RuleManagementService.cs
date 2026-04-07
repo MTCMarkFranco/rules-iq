@@ -21,6 +21,7 @@ public sealed class ManagedDocument
     public string? SemanticLabel { get; set; }
     public DateTimeOffset? IndexedTimestamp { get; set; }
     public DateTimeOffset? RulesetPublishedTimestamp { get; set; }
+    public string SourceSasUrl { get; set; } = string.Empty;
     public List<ManagedRule> Rules { get; set; } = [];
     public bool IsDirty { get; set; }
 }
@@ -47,11 +48,13 @@ public interface IRuleManagementService
 public sealed class RuleManagementService : IRuleManagementService
 {
     private readonly ISearchClientService _searchClient;
+    private readonly IBlobSasService _blobSasService;
     private readonly ILogger<RuleManagementService> _logger;
 
-    public RuleManagementService(ISearchClientService searchClient, ILogger<RuleManagementService> logger)
+    public RuleManagementService(ISearchClientService searchClient, IBlobSasService blobSasService, ILogger<RuleManagementService> logger)
     {
         _searchClient = searchClient;
+        _blobSasService = blobSasService;
         _logger = logger;
     }
 
@@ -96,6 +99,10 @@ public sealed class RuleManagementService : IRuleManagementService
 
             if (managed.Rules.Count > 0)
             {
+                if (!string.IsNullOrEmpty(managed.SourceUri))
+                {
+                    managed.SourceSasUrl = await _blobSasService.GetBlobSasUrlAsync(managed.SourceUri, ct);
+                }
                 result.Add(managed);
             }
         }

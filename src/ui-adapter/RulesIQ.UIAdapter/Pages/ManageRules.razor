@@ -20,7 +20,7 @@
         @if (!_loading && _documents.Count > 0)
         {
             <span class="text-muted">
-                @_documents.Count document(s) &middot; @_documents.Sum(d => d.Rules.Count) total rules
+                @_documents.Select(d => d.SourceUri).Where(u => !string.IsNullOrEmpty(u)).Distinct().Count() document(s) &middot; @_documents.Sum(d => d.Rules.Count) total rules
                 @{ var dirtyCount = _documents.Count(d => d.IsDirty); }
                 @if (dirtyCount > 0)
                 {
@@ -108,7 +108,15 @@ else
                         <div class="mb-3">
                             <label class="form-label fw-bold">Source Document</label>
                             <div>
-                                @if (!string.IsNullOrEmpty(doc.SourceUri))
+                                @if (!string.IsNullOrEmpty(doc.SourceSasUrl))
+                                {
+                                    <a href="@doc.SourceSasUrl" target="_blank" rel="noopener noreferrer"
+                                       class="btn btn-outline-primary btn-sm">
+                                        <span class="oi oi-external-link me-1"></span>
+                                        Open @GetDocumentFileName(doc.SourceUri)
+                                    </a>
+                                }
+                                else if (!string.IsNullOrEmpty(doc.SourceUri))
                                 {
                                     <a href="@doc.SourceUri" target="_blank" rel="noopener noreferrer"
                                        class="btn btn-outline-primary btn-sm">

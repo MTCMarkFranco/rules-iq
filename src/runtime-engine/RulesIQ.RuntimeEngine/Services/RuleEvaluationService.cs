@@ -52,6 +52,7 @@ public sealed class RuleEvaluationService : IRuleEvaluationService
 
             ruleSnapshots.Add(new RuleSnapshotEntry
             {
+                RuleId = normalizedRule.Id,
                 RuleName = normalizedRule.RuleName,
                 Expression = normalizedRule.Expression,
                 Result = isPassed ? "Passed" : "Failed",
@@ -68,6 +69,7 @@ public sealed class RuleEvaluationService : IRuleEvaluationService
                 failed++;
                 failedRules.Add(new FailedRuleEntry
                 {
+                    RuleId = normalizedRule.Id,
                     RuleName = normalizedRule.RuleName,
                     Expression = normalizedRule.Expression,
                     ErrorMessage = normalizedRule.ErrorMessage
@@ -129,7 +131,7 @@ public sealed class RuleEvaluationService : IRuleEvaluationService
             WorkflowName = normalized.WorkflowName,
             Rules = normalized.Rules.Select(r => new Rule
             {
-                RuleName = r.RuleName,
+                RuleName = r.Id,
                 // Map contract convention (input.) to RulesEngine convention (input1.)
                 Expression = Regex.Replace(r.Expression, @"\binput\.", "input1."),
                 SuccessEvent = r.SuccessEvent,

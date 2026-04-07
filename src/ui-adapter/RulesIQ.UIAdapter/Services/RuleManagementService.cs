@@ -1,3 +1,4 @@
+using System.Diagnostics;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using RulesIQ.Infrastructure.Services;
@@ -21,7 +22,6 @@ public sealed class ManagedDocument
     public string? SemanticLabel { get; set; }
     public DateTimeOffset? IndexedTimestamp { get; set; }
     public DateTimeOffset? RulesetPublishedTimestamp { get; set; }
-    public string SourceSasUrl { get; set; } = string.Empty;
     public List<ManagedRule> Rules { get; set; } = [];
     public bool IsDirty { get; set; }
 }
@@ -48,19 +48,24 @@ public interface IRuleManagementService
 public sealed class RuleManagementService : IRuleManagementService
 {
     private readonly ISearchClientService _searchClient;
-    private readonly IBlobSasService _blobSasService;
     private readonly ILogger<RuleManagementService> _logger;
 
-    public RuleManagementService(ISearchClientService searchClient, IBlobSasService blobSasService, ILogger<RuleManagementService> logger)
+    public RuleManagementService(ISearchClientService searchClient, ILogger<RuleManagementService> logger)
     {
         _searchClient = searchClient;
-        _blobSasService = blobSasService;
         _logger = logger;
     }
 
     public async Task<List<ManagedDocument>> LoadAllRuleDocumentsAsync(CancellationToken ct = default)
     {
+        var totalSw = Stopwatch.StartNew();
+
+        var searchSw = Stopwatch.StartNew();
         var documents = await _searchClient.SearchAllDocumentsForManagementAsync(ct);
+        searchSw.Stop();
+        Console.WriteLine($"[Timing] SearchAllDocumentsForManagement: {searchSw.ElapsedMilliseconds}ms ({documents.Count} docs)");
+
+        var parseSw = Stopwatch.StartNew();
         var result = new List<ManagedDocument>();
 
         foreach (var doc in documents)
@@ -99,13 +104,14 @@ public sealed class RuleManagementService : IRuleManagementService
 
             if (managed.Rules.Count > 0)
             {
-                if (!string.IsNullOrEmpty(managed.SourceUri))
-                {
-                    managed.SourceSasUrl = await _blobSasService.GetBlobSasUrlAsync(managed.SourceUri, ct);
-                }
                 result.Add(managed);
             }
         }
+        parseSw.Stop();
+        Console.WriteLine($"[Timing] Parse documents + deserialize rules: {parseSw.ElapsedMilliseconds}ms ({result.Count} with rules)");
+
+        totalSw.Stop();
+        Console.WriteLine($"[Timing] LoadAllRuleDocumentsAsync TOTAL: {totalSw.ElapsedMilliseconds}ms");
 
         _logger.LogInformation("Loaded {Count} documents with {RuleCount} total rules for management",
             result.Count, result.Sum(d => d.Rules.Count));

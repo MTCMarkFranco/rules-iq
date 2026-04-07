@@ -5,6 +5,7 @@ using Azure.Search.Documents.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RulesIQ.Infrastructure.Configuration;
+using System.Diagnostics;
 using System.Text.Json;
 
 namespace RulesIQ.Infrastructure.Services;
@@ -39,7 +40,7 @@ public sealed class SearchClientService : ISearchClientService
         var searchOptions = new SearchOptions
         {
             Filter = $"HasRules eq true and WorkflowName eq '{workflowName}'",
-            Select = { "RulesJson", "Content", "SourceUri", "PageNumber", "RulesetVersion", "SourceDocumentVersion", "SourceDocumentId" },
+            Select = { "id", "RulesJson", "Content", "SourceUri", "PageNumber", "RulesetVersion", "SourceDocumentVersion", "SourceDocumentId" },
             Size = 100
         };
 
@@ -60,7 +61,7 @@ public sealed class SearchClientService : ISearchClientService
         var searchOptions = new SearchOptions
         {
             Filter = "HasRules eq true",
-            Select = { "RulesJson", "Content", "SourceUri", "PageNumber", "RulesetVersion", "SourceDocumentVersion", "SourceDocumentId", "WorkflowName" },
+            Select = { "id", "RulesJson", "Content", "SourceUri", "PageNumber", "RulesetVersion", "SourceDocumentVersion", "SourceDocumentId", "WorkflowName" },
             Size = 1000
         };
 
@@ -81,7 +82,7 @@ public sealed class SearchClientService : ISearchClientService
         var searchOptions = new SearchOptions
         {
             Filter = $"HasRules eq true and SourceDocumentId eq '{documentId}'",
-            Select = { "RulesJson", "Content", "PageNumber", "RulesetVersion", "SourceDocumentVersion" },
+            Select = { "id", "RulesJson", "Content", "PageNumber", "RulesetVersion", "SourceDocumentVersion" },
             Size = 100
         };
 
@@ -97,6 +98,7 @@ public sealed class SearchClientService : ISearchClientService
 
     public async Task<List<SearchDocument>> SearchAllDocumentsForManagementAsync(CancellationToken cancellationToken = default)
     {
+        var sw = Stopwatch.StartNew();
         _logger.LogInformation("Searching all documents with rules for management");
         var searchOptions = new SearchOptions
         {
@@ -114,6 +116,8 @@ public sealed class SearchClientService : ISearchClientService
             results.Add(result.Document);
         }
 
+        sw.Stop();
+        Console.WriteLine($"[Timing] SearchClientService.SearchAllDocumentsForManagement: {sw.ElapsedMilliseconds}ms ({results.Count} results)");
         _logger.LogInformation("Found {Count} documents with rules for management", results.Count);
         return results;
     }

@@ -62,3 +62,36 @@ a, .btn-link {
     .blazor-error-boundary::after {
         content: "An error has occurred."
     }
+
+/* Responsive accordion */
+.accordion-body {
+    max-height: 65vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.accordion-body textarea {
+    max-width: 100%;
+    resize: vertical;
+}
+
+.accordion-body .card {
+    overflow: hidden;
+}
+
+.accordion-body .font-monospace {
+    word-break: break-all;
+}
+
+@media (max-width: 767.98px) {
+    .accordion-body .row > [class*="col-md-"] {
+        margin-bottom: 0.5rem;
+    }
+
+    .accordion-body {
+        max-height: 55vh;
+        padding: 0.75rem;
+    }
+}

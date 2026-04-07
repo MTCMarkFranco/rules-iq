@@ -361,7 +361,7 @@ public sealed class AgentEvaluationService : IAgentEvaluationService
             {
                 if (insufficientFields.Contains(match.Groups[1].Value))
                 {
-                    result.Add(rule.RuleName);
+                    result.Add(rule.Id);
                     break;
                 }
             }
@@ -374,7 +374,7 @@ public sealed class AgentEvaluationService : IAgentEvaluationService
         int reclassified = 0;
         foreach (var snapshot in result.RulesSnapshot.Rules)
         {
-            if (insufficientRuleNames.Contains(snapshot.RuleName) && snapshot.Result != "Passed")
+            if (insufficientRuleNames.Contains(snapshot.RuleId) && snapshot.Result != "Passed")
             {
                 snapshot.Result = "Not Evaluated";
                 snapshot.ErrorMessage = "Insufficient data — the applicant input does not contain the fields required to evaluate this rule.";
@@ -384,7 +384,7 @@ public sealed class AgentEvaluationService : IAgentEvaluationService
         }
 
         // Remove reclassified rules from FailedRules and recalculate score
-        result.ComplianceScore.FailedRules.RemoveAll(f => insufficientRuleNames.Contains(f.RuleName));
+        result.ComplianceScore.FailedRules.RemoveAll(f => insufficientRuleNames.Contains(f.RuleId));
         result.ComplianceScore.RulesFailed -= reclassified;
         result.ComplianceScore.TotalRulesEvaluated -= reclassified;
 

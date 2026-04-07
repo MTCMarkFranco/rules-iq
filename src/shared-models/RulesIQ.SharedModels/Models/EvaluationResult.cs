@@ -73,6 +73,9 @@ public sealed class ComplianceScore
 
 public sealed class FailedRuleEntry
 {
+    [JsonPropertyName("RuleId")]
+    public string RuleId { get; set; } = string.Empty;
+
     [JsonPropertyName("RuleName")]
     public string RuleName { get; set; } = string.Empty;
 
@@ -97,6 +100,9 @@ public sealed class RulesSnapshot
 
 public sealed class RuleSnapshotEntry
 {
+    [JsonPropertyName("RuleId")]
+    public string RuleId { get; set; } = string.Empty;
+
     [JsonPropertyName("RuleName")]
     public string RuleName { get; set; } = string.Empty;
 

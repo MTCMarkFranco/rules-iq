@@ -78,9 +78,9 @@ else
                 <h2 class="accordion-header">
                     <button class="accordion-button @(isExpanded ? "" : "collapsed")" type="button"
                             @onclick="() => ToggleDocument(docId)">
-                        <div class="d-flex w-100 justify-content-between align-items-center pe-3">
-                            <div>
-                                <strong>@(doc.SourceDocumentId)</strong>
+                        <div class="d-flex w-100 justify-content-between align-items-center pe-3" style="min-width: 0;">
+                            <div style="min-width: 0; overflow: hidden; text-overflow: ellipsis;">
+                                <strong>@GetDocumentFileName(doc.SourceUri)</strong>
                                 @if (doc.PageNumber.HasValue)
                                 {
                                     <span class="text-muted ms-1">— Page @doc.PageNumber</span>
@@ -91,13 +91,6 @@ else
                                     <span class="badge bg-warning ms-1">Modified</span>
                                 }
                             </div>
-                            <small class="text-muted">
-                                @doc.WorkflowName
-                                @if (!string.IsNullOrEmpty(doc.RulesetVersion))
-                                {
-                                    <span class="ms-1">v@(doc.RulesetVersion)</span>
-                                }
-                            </small>
                         </div>
                     </button>
                 </h2>
@@ -108,15 +101,7 @@ else
                         <div class="mb-3">
                             <label class="form-label fw-bold">Source Document</label>
                             <div>
-                                @if (!string.IsNullOrEmpty(doc.SourceSasUrl))
-                                {
-                                    <a href="@doc.SourceSasUrl" target="_blank" rel="noopener noreferrer"
-                                       class="btn btn-outline-primary btn-sm">
-                                        <span class="oi oi-external-link me-1"></span>
-                                        Open @GetDocumentFileName(doc.SourceUri)
-                                    </a>
-                                }
-                                else if (!string.IsNullOrEmpty(doc.SourceUri))
+                                @if (!string.IsNullOrEmpty(doc.SourceUri))
                                 {
                                     <a href="@doc.SourceUri" target="_blank" rel="noopener noreferrer"
                                        class="btn btn-outline-primary btn-sm">
@@ -220,7 +205,7 @@ else
                         </div>
 
                         @* Metadata footer *@
-                        <div class="border-top pt-2">
+                        <div class="border-top pt-2" style="word-break: break-word;">
                             <small class="text-muted">
                                 <strong>Document ID:</strong> @doc.Id |
                                 <strong>Indexed:</strong> @(doc.IndexedTimestamp?.ToString("yyyy-MM-dd HH:mm") ?? "N/A") |

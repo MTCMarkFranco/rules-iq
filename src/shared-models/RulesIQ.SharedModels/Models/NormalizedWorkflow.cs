@@ -31,6 +31,9 @@ public sealed class NormalizedWorkflow
 /// </summary>
 public sealed class NormalizedRule
 {
+    [JsonPropertyName("Id")]
+    public string Id { get; set; } = string.Empty;
+
     [JsonPropertyName("RuleName")]
     public string RuleName { get; set; } = string.Empty;
 

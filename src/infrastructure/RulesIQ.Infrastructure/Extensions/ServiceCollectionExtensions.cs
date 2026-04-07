@@ -15,7 +15,6 @@ public static class ServiceCollectionExtensions
 
         services.AddSingleton<IOpenAIClientService, OpenAIClientService>();
         services.AddSingleton<ISearchClientService, SearchClientService>();
-        services.AddSingleton<IBlobSasService, BlobSasService>();
 
         return services;
     }

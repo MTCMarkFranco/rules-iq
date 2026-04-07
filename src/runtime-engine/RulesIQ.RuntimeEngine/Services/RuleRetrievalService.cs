@@ -35,6 +35,8 @@ public sealed class RuleRetrievalService : IRuleRetrievalService
 
         foreach (var doc in documents)
         {
+            var docId = doc.TryGetValue("id", out var idObj) ? idObj?.ToString() ?? "" : "";
+
             if (doc.TryGetValue("RulesJson", out var rulesJsonObj) && rulesJsonObj is string rulesJsonStr)
             {
                 var payload = JsonSerializer.Deserialize<IndexRulesPayload>(rulesJsonStr);
@@ -44,10 +46,12 @@ public sealed class RuleRetrievalService : IRuleRetrievalService
                     sourceDocumentVersion ??= payload.SourceDocumentVersion;
                     publishedTimestamp ??= payload.RulesetPublishedTimestamp;
 
-                    foreach (var rule in payload.Rules)
+                    for (int i = 0; i < payload.Rules.Count; i++)
                     {
+                        var rule = payload.Rules[i];
                         allRules.Add(new NormalizedRule
                         {
+                            Id = $"{docId}_{i + 1}",
                             RuleName = rule.RuleName,
                             Expression = rule.Expression,
                             SuccessEvent = rule.SuccessEvent,
@@ -73,14 +77,7 @@ public sealed class RuleRetrievalService : IRuleRetrievalService
             }
         }
 
-        // Deduplicate by RuleName — multiple index chunks can produce rules with the same name.
-        // Keep the first occurrence of each rule name.
-        var deduped = allRules
-            .GroupBy(r => r.RuleName)
-            .Select(g => g.First())
-            .ToList();
-
-        _logger.LogInformation("Retrieved {Count} total rules from index ({Deduped} after dedup)", allRules.Count, deduped.Count);
+        _logger.LogInformation("Retrieved {Count} rules from index", allRules.Count);
 
         return new NormalizedWorkflow
         {
@@ -88,7 +85,7 @@ public sealed class RuleRetrievalService : IRuleRetrievalService
             RulesetVersion = rulesetVersion,
             SourceDocumentVersion = sourceDocumentVersion,
             RulesetPublishedTimestamp = publishedTimestamp,
-            Rules = deduped
+            Rules = allRules
         };
     }
 
@@ -105,6 +102,8 @@ public sealed class RuleRetrievalService : IRuleRetrievalService
 
         foreach (var doc in documents)
         {
+            var docId = doc.TryGetValue("id", out var idObj) ? idObj?.ToString() ?? "" : "";
+
             if (doc.TryGetValue("RulesJson", out var rulesJsonObj) && rulesJsonObj is string rulesJsonStr)
             {
                 var payload = JsonSerializer.Deserialize<IndexRulesPayload>(rulesJsonStr);
@@ -114,10 +113,12 @@ public sealed class RuleRetrievalService : IRuleRetrievalService
                     sourceDocumentVersion ??= payload.SourceDocumentVersion;
                     publishedTimestamp ??= payload.RulesetPublishedTimestamp;
 
-                    foreach (var rule in payload.Rules)
+                    for (int i = 0; i < payload.Rules.Count; i++)
                     {
+                        var rule = payload.Rules[i];
                         allRules.Add(new NormalizedRule
                         {
+                            Id = $"{docId}_{i + 1}",
                             RuleName = rule.RuleName,
                             Expression = rule.Expression,
                             SuccessEvent = rule.SuccessEvent,

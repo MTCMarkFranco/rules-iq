@@ -1,7 +1,6 @@
 @page "/evaluate"
 @using RulesIQ.RuntimeEngine.Services
 @using RulesIQ.UIAdapter.Services
-@inject IRuleEvaluationService EvaluationService
 @inject IAgentEvaluationService AgentEvaluationService
 @inject IRuleRetrievalService RetrievalService
 @inject ITraceabilityService TraceabilityService
@@ -15,7 +14,7 @@
         <div class="card mb-3">
             <div class="card-header"><strong>Applicant Information</strong></div>
             <div class="card-body">
-                <EditForm Model="@_input" OnValidSubmit="RunEvaluation">
+                <EditForm Model="@_input">
                     <div class="mb-2">
                         <label class="form-label">Age</label>
                         <InputNumber class="form-control" @bind-Value="_input.Age" />
@@ -95,10 +94,7 @@
                         </InputSelect>
                     </div>
                     <div class="mt-3">
-                        <button type="submit" class="btn btn-primary" disabled="@_evaluating">
-                            @(_evaluating ? "Evaluating..." : "Evaluate Compliance")
-                        </button>
-                        <button type="button" class="btn btn-success ms-2" disabled="@_evaluating" @onclick="RunAgentEvaluation">
+                        <button type="button" class="btn btn-success" disabled="@_evaluating" @onclick="RunAgentEvaluation">
                             @(_evaluating ? "Evaluating..." : "\U0001f916 Agent Evaluate")
                         </button>
                         <button type="button" class="btn btn-outline-secondary ms-2" @onclick="LoadCanonicalPersona">
@@ -131,35 +127,6 @@
     private void LoadCanonicalPersona()
     {
         _input = LoanEligibilityInput.CanonicalTestPersona;
-    }
-
-    private async Task RunEvaluation()
-    {
-        _evaluating = true;
-        _result = null;
-        _error = null;
-
-        try
-        {
-            var workflow = await RetrievalService.RetrieveAllRulesAsync();
-
-            if (workflow.Rules.Count == 0)
-            {
-                _error = "No rules found in the search index. Ensure the indexer has run.";
-                return;
-            }
-
-            _result = await EvaluationService.EvaluateAsync(
-                workflow, _input, "Determine loan eligibility for personal loan application");
-        }
-        catch (Exception ex)
-        {
-            _error = $"Evaluation failed: {ex.Message}";
-        }
-        finally
-        {
-            _evaluating = false;
-        }
     }
 
     private async Task RunAgentEvaluation()
